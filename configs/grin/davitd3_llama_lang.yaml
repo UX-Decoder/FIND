@@ -1,0 +1,541 @@
+# --------------------------------------------------------
+# X-Decoder -- Generalized Decoding for Pixel, Image, and Language
+# Copyright (c) 2022 Microsoft
+# Licensed under The MIT License [see LICENSE for details]
+# Written by Xueyan Zou (xueyan@cs.wisc.edu)
+# --------------------------------------------------------
+
+# Define Test/Trainer/Saving
+PIPELINE: GRINPipeline
+TRAINER: xdecoder
+SAVE_DIR: '../../data/output/test'
+base_path: "./"
+
+# Resume Logistic
+RESUME: false
+WEIGHT: false
+RESUME_FROM: ''
+EVAL_AT_START: false
+FAKE_UPDATE: false
+
+# Logging and Debug
+WANDB: False
+LOG_EVERY: 100
+FIND_UNUSED_PARAMETERS: false
+
+# Speed up training
+FP16: false
+PORT: '55551'
+
+# misc
+LOADER:
+  JOINT: False
+  KEY_DATASET: 'coco'
+
+##################
+# Task settings
+##################
+VERBOSE: true
+MODEL:
+  NAME: grin_model
+  HEAD: xdecoder_head
+  MASK_ON: false
+  KEYPOINT_ON: false
+  LOAD_PROPOSALS: false
+  DIM_PROJ: 512
+  BACKBONE_DIM: 768
+  TEXT:
+    ARCH: llamaencoder
+    NAME: huggyllama/llama-7b
+    TOKENIZER: clip
+    CONTEXT_LENGTH: 77 # 77
+    STOP_TOKEN: "###"
+    WIDTH: 4096
+    FEATURE_LAYER: -12
+    LOAD_TENSOR: False
+    PRECOMPUTE: False
+  BACKBONE:
+    NAME: davit
+    PRETRAINED: ''
+    LOAD_PRETRAINED: false
+    PRETRAINED_LAYERS: '*'
+    DAVIT:
+      DROP_PATH_RATE: 0.3
+      PATCH_SIZE: [7, 2, 2, 2]
+      PATCH_STRIDE: [4, 2, 2, 2]
+      PATCH_PADDING: [3, 0, 0, 0]
+      PATCH_PRENORM: [false, true, true, true]
+      DIM_EMBED: [128, 256, 512, 1024]
+      NUM_HEADS: [4, 8, 16, 32]
+      NUM_GROUPS: [4, 8, 16, 32]
+      DEPTHS: [1, 1, 9, 1]
+      OUT_FEATURES: ["res2", "res3", "res4", "res5"]
+      OUT_INDICES: [0, 1, 2, 3]
+      ENABLE_CHECKPOINT: False
+  ENCODER:
+    NAME: transformer_encoder_fpn
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 133
+    LOSS_WEIGHT: 1.0
+    CONVS_DIM: 512
+    MASK_DIM: 512
+    NORM: "GN"
+    IN_FEATURES: ["res2", "res3", "res4", "res5"]
+    DEFORMABLE_TRANSFORMER_ENCODER_IN_FEATURES: ["res3", "res4", "res5"]
+    COMMON_STRIDE: 4
+    TRANSFORMER_ENC_LAYERS: 6
+  DECODER:
+    NAME: grin
+    TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
+    MASK:
+      ENABLED: True
+      CLASS_TOKEN_LENGTH: 150
+    DETECTION: False
+    SPATIAL:
+      ENABLED: True
+      MAX_ITER: 1
+    GROUNDING:
+      ENABLED: True
+      MAX_LEN: 5
+      TEXT_WEIGHT: 2.0
+      CLASS_WEIGHT: 0.5
+    RETRIEVAL:
+      ENABLED: True
+      DIM_IMG: 768
+      ENSEMBLE: False
+    INTERLEAVE:
+      ENABLED: True
+      VISUAL_PROB: 0.5
+    LVIS:
+      ENABLED: False
+      THRES: 0.7
+    OPENIMAGE:
+      ENABLED: False
+      NEGATIVE_SAMPLES: 5
+      GROUNDING:
+        ENABLED: False
+        MAX_LEN: 5
+    CAPTION:
+      ENABLED: False
+      PHRASE_PROB: 0.5
+      SIM_THRES: 0.95
+    DEEP_SUPERVISION: True
+    NO_OBJECT_WEIGHT: 0.1
+    RETRIEVAL_WEIGHT: 8.0
+    BACKBONER_WEIGHT: 8.0
+    GCLASS_WEIGHT: 0.4
+    GMASK_WEIGHT: 1.0
+    GDICE_WEIGHT: 1.0
+    SCLASS_WEIGHT: 0.4
+    SMASK_WEIGHT: 1.0
+    SDICE_WEIGHT: 1.0
+    IITC_WEIGHT: 8.0
+    ICLASS_WEIGHT: 0.4
+    IMASK_WEIGHT: 1.0
+    IDICE_WEIGHT: 1.0
+    OCLASS_WEIGHT: 0.4
+    OMASK_WEIGHT: 1.0
+    ODICE_WEIGHT: 1.0
+    CLASS_WEIGHT: 2.0
+    MASK_WEIGHT: 5.0
+    DICE_WEIGHT: 5.0
+    BBOX_WEIGHT: 5.0
+    GIOU_WEIGHT: 2.0
+    CAPTION_WEIGHT: 2.0
+    COST_SPATIAL:
+      CLASS_WEIGHT: 5.0
+      MASK_WEIGHT: 2.0
+      DICE_WEIGHT: 2.0
+    HIDDEN_DIM: 512
+    NUM_OBJECT_QUERIES: 101
+    NHEADS: 8
+    DROPOUT: 0.0
+    DIM_FEEDFORWARD: 2048
+    MAX_SPATIAL_LEN: [512, 512, 512, 512]
+    # ENC_LAYERS: 0
+    PRE_NORM: False
+    ENFORCE_INPUT_PROJ: False
+    SIZE_DIVISIBILITY: 32
+    TRAIN_NUM_POINTS: 12544
+    OVERSAMPLE_RATIO: 3.0
+    IMPORTANCE_SAMPLE_RATIO: 0.75
+    DEC_LAYERS: 10  # 9 decoder layers, add one for the loss on learnable query
+    TOP_GROUNDING_LAYERS: 10
+    TOP_CAPTION_LAYERS: 10
+    TOP_SPATIAL_LAYERS: 10
+    TOP_OPENIMAGE_LAYERS: 10
+    TOP_RETRIEVAL_LAYERS: 10
+    TOP_INTERLEAVE_LAYERS: 10
+    TEST:
+      SEMANTIC_ON: True
+      INSTANCE_ON: True
+      PANOPTIC_ON: True
+      OVERLAP_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0.8
+      SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE: false
+
+# Spatial sampler
+STROKE_SAMPLER:
+  MAX_CANDIDATE: 10 # NOTE: only support 1 for now
+  CANDIDATE_PROBS: [0.25, 0.25, 0.25, 0.25] # for training only
+  CANDIDATE_NAMES: ["Point", "Polygon", "Scribble", "Circle"]
+  DILATION: 3
+  CIRCLE:
+    NUM_STROKES: 5
+    STROKE_PRESET: ['object_like', 'object_like_middle', 'object_like_small']
+    STROKE_PROB: [0.33, 0.33, 0.33]
+  SCRIBBLE:
+    NUM_STROKES: 5
+    STROKE_PRESET: ['rand_curve', 'rand_curve_small']
+    STROKE_PROB: [0.5, 0.5]
+  POINT:
+    NUM_POINTS: 20
+  POLYGON:
+    MAX_POINTS: 9
+  EVAL:
+    MODE: 'best' # best/random
+    NEGATIVE: False
+    MAX_ITER: 1
+    IOU_ITER: 1
+    GROUNDING: False
+
+# Multi-modal Architecture, order matters
+ATTENTION_ARCH:
+  VARIABLE:
+    proposals:
+      vision: ['object', 'grounding', 'segment']
+      interleave: ['entity']
+    queries:
+      vision: ['image', 'spatial']
+      language: ['caption', 'class', 'description']
+      interleave: ['legend', 'entity']
+    tokens:
+      vision: ['spatial', 'spatial_']
+      language: ['caption', 'description', 'class']
+      interleave: ['legend']
+    memories:
+      vision: ['spatial']
+  SELF_ATTENTION:
+    proposals:
+      vision:
+        object: ['proposals_vision_object']
+        grounding: ['proposals_vision_grounding', 'tokens_language_description']
+        segment: ['proposals_vision_segment', 'tokens_vision_spatial', 'memories_vision_spatial']
+      interleave:
+        entity: ['proposals_interleave_entity', 'tokens_interleave_legend']
+    queries:
+      vision:
+        image: ['queries_vision_image']
+        spatial: ['queries_vision_spatial']
+      language:
+        caption: ['queries_language_caption']
+        class: ['queries_language_class']
+        description: ['queries_language_description']
+      interleave:
+        legend: ['queries_interleave_legend']
+        entity: ['queries_interleave_entity']
+    tokens:
+      vision:
+        spatial: ['tokens_vision_spatial']
+        spatial_: ['tokens_vision_spatial_']
+      language:
+        description: [proposals_vision_grounding, 'tokens_language_description']
+        caption: ['tokens_language_caption']
+        class: ['tokens_language_class']
+      interleave:
+        legend: ['tokens_interleave_legend']
+    memories:
+      vision:
+        spatial: ['memories_vision_spatial']
+  CROSS_ATTENTION:
+    proposals:
+      vision:
+        object: ['features_vision_image']
+        grounding: ['features_vision_image']
+        segment: ['features_vision_image']
+      interleave:
+        entity: ['features_vision_image']
+    queries:
+      vision:
+        image: ['features_vision_image']
+        spatial: ['tokens_vision_spatial']
+      language:
+        caption: ['tokens_language_caption']
+        class: ['tokens_language_class']
+        description: ['tokens_language_description']
+      interleave:
+        legend: ['tokens_interleave_legend']
+        entity: ['tokens_interleave_legend']
+    tokens:
+      vision:
+        spatial: []
+        spatial_: []
+      language:
+        description: []
+        caption: []
+      interleave:
+        legend: ['tokens_vision_spatial_']
+    memories:
+      vision:
+        spatial: ['features_vision_image']
+  OUTPUT:
+    proposals:
+      vision:
+        object: True
+        grounding: True
+        segment: True
+      interleave:
+        entity: True
+    queries:
+      vision:
+        image: True
+        spatial: True
+      language:
+        caption: True
+        class: True
+        description: True
+      interleave:
+        legend: True
+        entity: True
+    tokens:
+      vision:
+        spatial: False
+        spatial_: False
+      language:
+        description: False
+        caption: False
+        class: False
+      interleave:
+        legend: False
+    memories:
+      vision:
+        spatial: True
+  MASKING: ['tokens_vision_spatial', 'tokens_vision_spatial_', 'tokens_language_description', 'tokens_interleave_legend', 'tokens_language_caption', 'tokens_language_class']
+  IGNORE_CROSS_MASK: ['queries_vision_image']
+  DUPLICATION:
+    proposals:
+      vision:
+        grounding: 'proposals_vision_object'
+        segment: 'proposals_vision_object'
+      interleave:
+        entity: 'proposals_vision_object'
+    queries:
+      vision:
+        spatial: 'queries_vision_image'
+      language:
+        caption: 'queries_vision_image'
+        class: 'queries_vision_image'
+        description: 'queries_vision_image'
+      interleave:
+        legend: 'queries_vision_image'
+        entity: 'queries_vision_image'
+  DYNAMICS:
+    CONDITIONAL_ATTENTION:
+      proposals:
+        vision:
+          segment: [['tokens_vision_spatial', 'queries_vision_spatial', 0.3]]
+  SPATIAL_MEMORIES: 32
+
+DATASETS:
+  # TRAIN: ["coco_2017_val_panoptic_with_sem_seg_caption_grounding_lvis_entity",]
+  TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding_lvis_entity",]
+  TEST: ["coco_2017_val_panoptic_with_sem_seg", "refcocog_val_umd", "vlp_val", "pascalvoc_val_Point", "grounding_coco_entity_val", "vlp_coco_entity_val"]  # to evaluate instance and semantic performance as well
+  # TEST: ["vlp_f30k_val_interleave2i"] # vlp_f30k_val_interleave2i, vlp_coco_val_interactive2i, vlp_coco_val_p2i, vlp_f30k_val_p2i, vlp_val
+  # TEST: ["pascalvoc_val_Point"] # sbd_val_*, pascalvoc_val_*
+  # TEST: ["grounding_coco_entity_val", "vlp_coco_entity_val", "vlp_coco_interleave_val"]
+  CLASS_CONCAT: false
+  SIZE_DIVISIBILITY: 32
+  PROPOSAL_FILES_TRAIN: []
+
+INPUT:
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+
+
+DATALOADER:
+  FILTER_EMPTY_ANNOTATIONS: False
+  NUM_WORKERS: 8
+  LOAD_PROPOSALS: False
+  SAMPLER_TRAIN: "TrainingSampler"
+  ASPECT_RATIO_GROUPING: True
+
+
+# Train dataset
+COCO:
+  INPUT:
+    MIN_SIZE_TRAIN: 800
+    MAX_SIZE_TRAIN: 1333
+    MIN_SIZE_TRAIN_SAMPLING: 'choice'
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
+    IMAGE_SIZE: 1024
+    MIN_SCALE: 0.1
+    MAX_SCALE: 2.0
+    DATASET_MAPPER_NAME: "coco_interleave"
+    IGNORE_VALUE: 255
+    COLOR_AUG_SSD: False
+    SIZE_DIVISIBILITY: 32
+    RANDOM_FLIP: "horizontal"
+    MASK_FORMAT: "polygon"
+    FORMAT: "RGB"
+    CROP:
+      ENABLED: True
+  DATASET:
+    DATASET: 'coco'
+  TEST:
+    DETECTIONS_PER_IMAGE: 100
+    NAME: coco_eval
+    IOU_TYPE: ['bbox', 'segm']
+    USE_MULTISCALE: false
+    BATCH_SIZE_TOTAL: 1
+    MODEL_FILE: ''
+    AUG:
+      ENABLED: False
+  TRAIN:
+    ASPECT_RATIO_GROUPING: true
+    BATCH_SIZE_TOTAL: 18
+    BATCH_SIZE_PER_GPU: 6
+    SHUFFLE: true
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 8
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: True
+
+# Validation dataset
+ADE20K:
+  INPUT:
+    MIN_SIZE_TRAIN: 640
+    MIN_SIZE_TRAIN_SAMPLING: "choice"
+    MIN_SIZE_TEST: 640
+    MAX_SIZE_TRAIN: 2560
+    MAX_SIZE_TEST: 2560
+    MASK_FORMAT: "polygon"
+    CROP:
+      ENABLED: True
+      TYPE: "absolute"
+      SIZE: (640, 640)
+      SINGLE_CATEGORY_MAX_AREA: 1.0
+    COLOR_AUG_SSD: True
+    SIZE_DIVISIBILITY: 640  # used in dataset mapper
+    DATASET_MAPPER_NAME: "mask_former_panoptic"
+    FORMAT: "RGB"
+  DATASET:
+    DATASET: 'ade'
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+
+
+SBD:
+  INPUT:
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 0
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: False
+  TEST:
+    BATCH_SIZE_TOTAL: 1
+
+VOC:
+  INPUT:
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 0
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: False
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+
+REF:
+  INPUT:
+    PIXEL_MEAN: [123.675, 116.280, 103.530]
+    PIXEL_STD: [58.395, 57.120, 57.375]
+    MIN_SIZE_TEST: 512
+    MAX_SIZE_TEST: 1024
+    FORMAT: "RGB"
+    SPATIAL: False
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 4
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: False
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+
+VLP:
+  INPUT:
+    IMAGE_SIZE: 224
+    SHORTEST_EDGE: False
+    MIN_SIZE_TEST: 512
+    MAX_SIZE_TEST: 1024
+    DATASET_MAPPER_NAME: "vlpretrain"
+    IGNORE_VALUE: 255
+    COLOR_AUG_SSD: False
+    SIZE_DIVISIBILITY: 32
+    MASK_FORMAT: "polygon"
+    FORMAT: "RGB"
+    CROP:
+      ENABLED: True
+  TRAIN:
+    BATCH_SIZE_TOTAL: 2
+    BATCH_SIZE_PER_GPU: 1
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 0
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: True
+
+F30K:
+  INPUT:
+    MIN_SIZE_TEST: 224
+    MAX_SIZE_TEST: 512
+    FORMAT: "RGB"
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 0
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: False
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+
+# Detectron2 training config for optimizer and lr scheduler
+SOLVER:
+  BASE_LR: 0.0001
+  STEPS: [0.88889, 0.96296]
+  MAX_ITER: 1
+  GAMMA: 0.1
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 10
+  WARMUP_METHOD: "linear"
+  WEIGHT_DECAY: 0.05
+  OPTIMIZER: "ADAMW"
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  LR_MULTIPLIER:
+    backbone: 0.1
+    lang_encoder: 1.0
+    pixel_decoder: 1.0
+  FIX_PARAM:
+    backbone: True
+    lang_encoder: True
+    pixel_decoder: True
+  IGNORE_FIX: ['lang_proj', 'logit_scale', 'backbone_proj']
+  WEIGHT_DECAY_NORM: 0.0
+  WEIGHT_DECAY_EMBED: 0.0
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 0.01 # 0.01
+    NORM_TYPE: 2.0
+  MAX_NUM_EPOCHS: 50
