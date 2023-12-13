@@ -337,8 +337,8 @@ class DaViT(nn.Module):
         drop_path_rate (float): Stochastic depth rate. Default: 0.1.
         norm_layer (nn.Module): Normalization layer. Default: nn.LayerNorm.
         enable_checkpoint (bool): If True, enable checkpointing. Default: False.
-        conv_at_attn (bool): If True, performe depthwise convolution before attention layer. Default: True.
-        conv_at_ffn (bool): If True, performe depthwise convolution before ffn layer. Default: True.
+        conv_at_attn (bool): If True, perform depthwise convolution before attention layer. Default: True.
+        conv_at_ffn (bool): If True, perform depthwise convolution before ffn layer. Default: True.
     """
 
     def __init__(
