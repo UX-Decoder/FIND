@@ -18,4 +18,9 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 - [x] Training Code
 - [x] Evaluation Code
 
-## :mushroom: Demo Example
+## :mushroom: Demo
+* **Example Output**
+
+<img width="500" alt="Screenshot 2023-12-13 at 10 28 05 AM" src="https://github.com/UX-Decoder/FIND/assets/11957155/48d84fb9-160c-4113-b50b-e7872dcde544">
+<img width="500" alt="Screenshot 2023-12-13 at 10 31 36 AM" src="https://github.com/UX-Decoder/FIND/assets/11957155/b63582b2-45ca-4b3d-afd1-419770af2e2a">
+
