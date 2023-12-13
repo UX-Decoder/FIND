@@ -17,3 +17,5 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 - [ ] Dataset (in a week)
 - [x] Training Code
 - [x] Evaluation Code
+
+## :mushroom: Demo Example
