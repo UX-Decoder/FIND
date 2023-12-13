@@ -334,6 +334,9 @@ def main(args=None):
                 object_class_emb_list += [outputs['pred_captions']]
                 object_pixel_emb_list += [outputs['pred_maskembs']]
 
+                # if idx == 10:
+                #     break
+
             image_embs_class = torch.cat(image_class_emb_list, dim=0)
             image_embs_class = image_embs_class / image_embs_class.norm(dim=-1, keepdim=True)
             object_embs_pixel = torch.cat(object_pixel_emb_list, dim=0)
@@ -389,7 +392,7 @@ def main(args=None):
                     # add_object_pixel_embs = add_object_pixel_embs / add_object_pixel_embs.norm(dim=-1, keepdim=True)
                     object_embs_pixel = torch.cat([object_embs_pixel, add_object_pixel_embs], dim=0)
 
-    def inference(image_content, text_content, search_space, *args):
+    def inference(search_space, *args):
         nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, interleave_text_long, interleave_entity_list
 
         # offset 0 is entity_text, offset 1 is entity_image, offset 2 is connection
@@ -475,7 +478,7 @@ def main(args=None):
                 # nq = i_emb_it.shape[1]
                 # ii_scores = (i_emb_it @ object_embs_class.reshape(1, bs*no, nd).transpose(1,2)).reshape(nq, bs, no).max(dim=-1)[0]
 
-                if 'Paragraph' in search_space:
+                if 'paragraph_coco_val2017' in search_space:
                     interleave_emb = outputs['pred_interleave_image'][0]
                     interleave_emb = interleave_emb / interleave_emb.norm(dim=-1, keepdim=True)
                     pred_entity_class = outputs['pred_entity_class'][0]
@@ -494,7 +497,7 @@ def main(args=None):
                         image = draw_text_on_image_with_score(sentence, entities, ei_scores_text)
                         image_gallery += [image]
 
-                if 'Dataset' in search_space:
+                if 'image_coco_val2017' in search_space:
                     # interleave proposals mode
                     ii_scores_list = []
                     for idx, entity in enumerate(entities):
@@ -551,8 +554,7 @@ def main(args=None):
 
                                 data = [{"image": images, "height": height, "width": width}]
                                 outputs = model.model.demo_interleave_grounding(data, extra)
-                                color = list(make_color_lighter(str(colors[idx%len(colors)]), 0.65))
-                                phrases = [{"text": x.text, "color": color} for idx, x in enumerate(entities)]
+                                phrases = [{"text": x.text, "color": colors[idx%len(colors)]} for idx, x in enumerate(entities)]
 
                                 pred_masks = outputs['pred_masks']
 
@@ -629,8 +631,7 @@ def main(args=None):
     gallery_output = gr.Gallery(label="Image Gallery.")
 
     with gr.Blocks(css=customCSS) as demo:
-        gr.Markdown(f"# Grounded Interleaved Visual Understanding")
-        gr.Markdown(f"The front-end is powered by [Arul Aravinthan](https://www.linkedin.com/in/arul-aravinthan-414509218).")
+        gr.Markdown(f"# &#x1F50E; FIND: Interfacing Foundation Models' Embeddings")
 
         example = gr.Examples(
             examples=[
@@ -667,31 +668,30 @@ def main(args=None):
                             last_idx, *input_list])
             clear.click(change_visibility, [clear_state, last_idx], [
                             last_idx, *input_list])
-
-        gr.Markdown(f"### 👉 Content.")
-        with gr.Row():
-            image_content = gr.Image(label="Image Content.")
-            text_content = gr.Textbox(label="Text Content.", lines=7)
-
-        gr.Markdown(f"### 👉 Search Space.")
-        with gr.Row():
-            search_space = gr.CheckboxGroup(["Image", "Paragraph", "Dataset"], label="Search Space.", value=["Dataset"])
             run = gr.Button("Run")
-            run.click(inference, [image_content, text_content, search_space] + [*input_list], [gallery_output])
+
+        # gr.Markdown(f"### 👉 Database.")
+        # with gr.Row():
+        #     image_content = gr.Image(label="image.")
+        #     text_content = gr.Textbox(label="paragraph.", lines=7)
+
+        with gr.Row():
+            search_space = gr.CheckboxGroup(["image_coco_val2017", "paragraph_coco_val2017"], label="Search Space.", value=["image_coco_val2017"])
+            run.click(inference, [search_space] + [*input_list], [gallery_output])
 
         gr.Markdown(f"### 👉 Results.")
         gallery_output.render()
 
-        gr.Markdown(f"### 👉 Upload new images to the database.")
-        with gr.Row():
-            input_image1 = gr.Image(label="Add Image 1.")
-            input_image2 = gr.Image(label="Add Image 2.")
-            input_image3 = gr.Image(label="Add Image 3.")
-            input_image4 = gr.Image(label="Add Image 4.")
-            input_image5 = gr.Image(label="Add Image 5.")
-            input_image6 = gr.Image(label="Add Image 6.")
-            addimage = gr.Button("Upload")
-            addimage.click(add_image, [input_image1, input_image2, input_image3, input_image4, input_image5, input_image6])
+        # gr.Markdown(f"### 👉 Upload new images to the database.")
+        # with gr.Row():
+        #     input_image1 = gr.Image(label="Add Image 1.")
+        #     input_image2 = gr.Image(label="Add Image 2.")
+        #     input_image3 = gr.Image(label="Add Image 3.")
+        #     input_image4 = gr.Image(label="Add Image 4.")
+        #     input_image5 = gr.Image(label="Add Image 5.")
+        #     input_image6 = gr.Image(label="Add Image 6.")
+        #     addimage = gr.Button("Upload")
+        #     addimage.click(add_image, [input_image1, input_image2, input_image3, input_image4, input_image5, input_image6])
 
     demo.launch(server_port=6036)
 
