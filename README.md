@@ -8,6 +8,7 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 ![FIND design](assets/images/find.jpg?raw=true)
 
 ## :rocket: Updates
+* **[2023.12.3]**  :fire: We have a poster session@NeurIPS for [SEEM](https://arxiv.org/pdf/2304.06718.pdf), feel free to visit us during 5:00-7:00pm (CT)!
 * **[2023.12.2]**  We have released all the training, evaluation, and demo code!
 
 ## :bookmark_tabs: Catalog
