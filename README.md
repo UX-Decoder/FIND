@@ -13,7 +13,6 @@ A brief introduction of all the generic and interleave tasks we can do!
 * **[2023.12.2]**  We have released all the training, evaluation, and demo code!
 
 ## :bookmark_tabs: Catalog
-We release the following contents for **both SEEM and X-Decoder**:exclamation:
 - [x] Demo Code
 - [ ] Model Checkpoint (in 1-2 days)
 - [ ] Comprehensive User Guide (in 1-2 days)
