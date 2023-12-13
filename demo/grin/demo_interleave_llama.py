@@ -633,16 +633,26 @@ def main(args=None):
     with gr.Blocks(css=customCSS) as demo:
         gr.Markdown(f"# &#x1F50E; FIND: Interfacing Foundation Models' Embeddings")
 
-        example = gr.Examples(
+        gr.Markdown(f"### 👉 Examples.")
+        example1 = gr.Examples(
             examples=[
                     ["A green and white leafy potted plant", None, None, None, None, "sits near", "a cozy bed with a blue comforter", None, None, None, None, "creating a relaxing atmosphere in the bedroom"]
-                    # ["Some fries", None, None, None, None, "is placed next to", None, "xy_utils/fries1.png", None],
                     ],
             inputs=[*input_list],
             outputs=gallery_output,
             cache_examples=False,
+            label='Image Retrieval & Grounding'
         )
 
+        example2 = gr.Examples(
+            examples=[
+                    [None, "assets/images/dog.jpg", None, None, None, "is sitting on", "a wooden bench", None, None, None, None, None]
+                    ],
+            inputs=[*input_list],
+            outputs=gallery_output,
+            cache_examples=False,
+            label='Interleave Retrieval & Grounding'
+        )
 
         gr.Markdown(f"### 👉 Query.")
         with gr.Row():
@@ -682,6 +692,19 @@ def main(args=None):
         gr.Markdown(f"### 👉 Results.")
         gallery_output.render()
 
+        gr.Markdown(f"### 👉 Usage.")
+        with gr.Row():
+            example3 = gr.Video(
+                value="assets/videos/example1.mp4",
+                label='Image Retrieval & Grounding',
+                width=400,
+            )
+            example4 = gr.Video(
+                value="assets/videos/example2.mp4",
+                label='Interleave Retrieval & Grounding',
+                width=400,
+            )
+
         # gr.Markdown(f"### 👉 Upload new images to the database.")
         # with gr.Row():
         #     input_image1 = gr.Image(label="Add Image 1.")
@@ -693,7 +716,7 @@ def main(args=None):
         #     addimage = gr.Button("Upload")
         #     addimage.click(add_image, [input_image1, input_image2, input_image3, input_image4, input_image5, input_image6])
 
-    demo.launch(server_port=6036)
+    demo.launch(server_port=7890)
 
 if __name__ == "__main__":
     main()
