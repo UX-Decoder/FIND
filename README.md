@@ -7,7 +7,7 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 
 A brief introduction of all the generic and interleave tasks we can do!
 
-![SEEM design](assets/images/find.png?raw=true)
+![FIND design](assets/images/find.jpg?raw=true)
 
 ## :rocket: Updates
 * **[2023.12.2]**  We have released all the training, evaluation, and demo code!
