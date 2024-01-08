@@ -13,11 +13,15 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 
 ## :bookmark_tabs: Catalog
 - [x] Demo Code
-- [ ] Model Checkpoint (in 1-2 days)
-- [ ] Comprehensive User Guide (in 1-2 days)
-- [ ] Dataset (in a week)
+- [ ] Model Checkpoint
+- [ ] Comprehensive User Guide
+- [ ] Dataset
 - [x] Training Code
 - [x] Evaluation Code
+
+
+## :hammer: Getting Started
+
 
 ## :mushroom: Demo
 * **Example Output**
