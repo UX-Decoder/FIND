@@ -15,12 +15,19 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 - [x] Demo Code
 - [ ] Model Checkpoint
 - [ ] Comprehensive User Guide
-- [ ] Dataset
+- [x] Dataset
 - [x] Training Code
 - [x] Evaluation Code
 
 
 ## :hammer: Getting Started
+
+## :coconut: Dataset
+| entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
+|-----------------------|---------------------|--------------------------|
+| [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017_long.json)                 |
+
+## :kiwi_fruit: Checkpoint
 
 
 ## :mushroom: Demo
