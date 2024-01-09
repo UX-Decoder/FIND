@@ -1,5 +1,5 @@
 # 🔍 FIND: Interface Foundation Models' Embeddings
-:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net/)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
+:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net:6789)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
 
 We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**ings in an interleaved shared embedding space. Below is a brief introduction of all the generic and interleave tasks we can do!
 
