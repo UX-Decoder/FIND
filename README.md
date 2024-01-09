@@ -13,7 +13,7 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 
 ## :bookmark_tabs: Catalog
 - [x] Demo Code
-- [ ] Model Checkpoint
+- [x] Model Checkpoint
 - [ ] Comprehensive User Guide
 - [x] Dataset
 - [x] Training Code
@@ -28,7 +28,13 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017_long.json)                 |
 
 ## :kiwi_fruit: Checkpoint
-
+|                   |          | COCO-Entity |      |      |       | COCO-Entity-Long |      |      |       |
+|-------------------|----------|-------------|------|------|-------|------------------|------|------|-------|
+|                   |          | cIoU        | AP50 | IR@5 | IR@10 | cIoU             | AP50 | IR@5 | IR@10 |
+| ImageBIND (H)     | -        | -           | -    | 51.4 | 61.3  | -                | -    | 58.7 | 68.9  |
+| Grounding-SAM (H) | -        | 58.9        | 63.2 | -    | -     | 56.1             | 62.5 | -    | -     |
+| Focal-T           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/grin_focalt_llama_x640.pt) | 74.9        | 79.5 | 43.5 | 57.1  | 73.2             | 77.7 | 49.4 | 63.9  |
+| Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/grin_focall_llama_x640.pt) |             |      |      |       |                  |      |      |       |
 
 ## :mushroom: Demo
 * **Example Output**
