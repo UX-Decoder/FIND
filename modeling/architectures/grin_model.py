@@ -969,6 +969,43 @@ class GeneralizedGRIN(nn.Module):
         pred_masks = (pred_masks.sigmoid() > 0.5).float()
         return {"pred_masks": pred_masks}
 
+    def demo_retrieval(self, batched_inputs):
+        assert len(batched_inputs) == 1
+        lang_results_retrieval = self.sem_seg_head.predictor.lang_encoder.get_text_token_embeddings(batched_inputs[-1]['tokens'], token=True)
+        caption_num = len(batched_inputs[-1]['captions'])
+
+        targets = []
+        for idx in range(caption_num):
+            target_dict = {}
+            target_dict['retrieval_query_embs'] = lang_results_retrieval['token_emb'][idx:idx+1][lang_results_retrieval['tokens']['attention_mask'][idx:idx+1].bool()]
+            targets += [target_dict]
+
+        retrieval_tokens = [x['retrieval_query_embs'] for x in targets]
+        retrieval_tokens = nn.utils.rnn.pad_sequence(retrieval_tokens, padding_value=-1)
+        non_zero_query_mask = (retrieval_tokens.sum(dim=-1) == -retrieval_tokens.shape[-1])
+        retrieval_tokens[non_zero_query_mask] = 0
+
+        extra = {}
+        extra['retrieval_tokens'] = retrieval_tokens
+        extra['retrieval_nonzero_mask'] = non_zero_query_mask.t()
+
+        images = [x["image"].to(self.device) for x in batched_inputs]
+        images = [(x - self.pixel_mean) / self.pixel_std for x in images]
+        images = ImageList.from_tensors(images, self.size_divisibility)
+        img_bs = images.tensor.shape[0]
+        
+        targets = targets_grounding = queries_grounding = None
+        features = self.backbone(images.tensor)
+        mask_features, _, multi_scale_features = self.sem_seg_head.pixel_decoder.forward_features(features)
+
+        multi_scale_features = [m.repeat(caption_num,1,1,1) for m in multi_scale_features]
+        mask_features = mask_features.repeat(caption_num,1,1,1)
+        outputs = self.sem_seg_head.predictor(multi_scale_features, mask_features, extra=extra, task='seg')
+
+        v_emb_it = outputs['pred_retrievals']
+        t_emb_it = outputs['pred_retrievals_lang']
+        return {'pred_retrievals_lang': t_emb_it}
+
     def evaluate_retrieval_interactive(self, batched_inputs):
         # interactive
         assert self.task_switch['spatial']

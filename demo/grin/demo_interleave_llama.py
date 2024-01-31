@@ -255,6 +255,59 @@ def main(args=None):
     tokenizer = AutoTokenizer.from_pretrained("huggyllama/llama-7b", padding_side='right')
     tokenizer.pad_token = tokenizer.eos_token
 
+    # prepare abstract data
+    import json
+    with open("./iclr2024_stat.json") as f:
+        abstract_data = json.load(f)
+
+    title_embed_list = []
+    abstract_embed_list = []
+    title_list = []
+    avg_score_list = []
+    papers = abstract_data['papers']
+    with torch.no_grad():
+        with torch.autocast(device_type='cuda', dtype=torch.float16):
+            model.model.get_class_embeddings(["default", "default"], is_eval=True)
+
+            for bidx, paper in enumerate(papers):
+                print(bidx)
+                title = paper['title']
+                abstract = paper['abstract']
+
+                title_tokens = tokenizer(
+                    [title], padding='max_length', truncation=True, max_length=77, return_tensors='pt'
+                )
+                batched_inputs = [{'tokens': {'input_ids': title_tokens['input_ids'].cuda(), 'attention_mask': title_tokens['attention_mask'].cuda()},
+                                    'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
+                outputs = model.model.demo_retrieval(batched_inputs)
+                title_embed_list += [outputs['pred_retrievals_lang'][0]]
+
+                abs_tokens = tokenizer(
+                    [abstract], padding='max_length', truncation=True, max_length=150, return_tensors='pt'
+                )
+                batched_inputs = [{'tokens': {'input_ids': abs_tokens['input_ids'].cuda(), 'attention_mask': abs_tokens['attention_mask'].cuda()},
+                                    'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
+                outputs = model.model.demo_retrieval(batched_inputs)
+                abstract_embed_list += [outputs['pred_retrievals_lang'][0]]
+
+                ranks = []
+                for review in paper['reviews']:
+                    ranks += [int(review['rating'].split(':')[0])]
+                if len(ranks) == 0:
+                    avg_ranks = 0
+                else:
+                    avg_ranks = sum(ranks) / len(ranks)
+                title_list += [title + ". Avg Score: {}, Ratings: {}".format(str(avg_ranks)[0:4], ranks)]
+                avg_score_list += [avg_ranks]
+
+                # if bidx == 100:
+                #     break
+
+    title_embed_list = torch.cat(title_embed_list, dim=0)
+    title_embed_list = title_embed_list / title_embed_list.norm(dim=-1, keepdim=True)
+    abstract_embed_list = torch.cat(abstract_embed_list, dim=0)
+    abstract_embed_list = abstract_embed_list / abstract_embed_list.norm(dim=-1, keepdim=True)
+
     interleave_text_list = []
     interleave_entity_list = []
 
@@ -393,7 +446,7 @@ def main(args=None):
                     object_embs_pixel = torch.cat([object_embs_pixel, add_object_pixel_embs], dim=0)
 
     def inference(search_space, *args):
-        nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, interleave_text_long, interleave_entity_list
+        nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, interleave_text_long, interleave_entity_list, title_embed_list, title_list, abstract_embed_list
 
         # offset 0 is entity_text, offset 1 is entity_image, offset 2 is connection
         sentence = ''
@@ -456,6 +509,29 @@ def main(args=None):
 
         with torch.no_grad():
             with torch.autocast(device_type='cuda', dtype=torch.float16):
+
+                if 'iclr_abstract' in search_space:
+                    title = entities[0].text
+                    title_tokens = tokenizer(
+                        [title], padding='max_length', truncation=True, max_length=77, return_tensors='pt'
+                    )
+                    batched_inputs = [{'tokens': {'input_ids': title_tokens['input_ids'].cuda(), 'attention_mask': title_tokens['attention_mask'].cuda()},
+                                        'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
+                    outputs = model.model.demo_retrieval(batched_inputs)
+                    query = outputs['pred_retrievals_lang'][0]
+                    query = query / query.norm(dim=-1, keepdim=True)
+
+                    query_scores = query @ abstract_embed_list.t() + query @ title_embed_list.t() * 0.5
+                    max_id = query_scores.topk(20, dim=-1).indices[0]
+                    output_text = ""
+                    avg_score = []
+                    for idx in max_id:
+                        output_text += title_list[idx] + "\n"
+                        avg_score += [avg_score_list[idx]]
+                    avg_score = sum(avg_score) / len(avg_score)
+                    output_text = "Top 20 Avg Score: {} \n".format(str(avg_score)[0:4]) + output_text
+                    return None, output_text
+
                 sentence = sentence + '.'
                 tokens = tokenizer(
                     [sentence], padding='max_length', truncation=True, max_length=77, return_tensors='pt', return_offsets_mapping=True
@@ -582,7 +658,7 @@ def main(args=None):
                                 image_gallery += [Image.fromarray(canvas).convert("RGB")]
                                 break
 
-        return image_gallery
+        return image_gallery, None
 
     # lastidx is the index to begin the offset from
     def change_visibility(inputType, last_idx):
@@ -629,6 +705,7 @@ def main(args=None):
 
     # initialize gallery
     gallery_output = gr.Gallery(label="Image Gallery.")
+    gallery_output2 = gr.Textbox(label="Text Gallery.")
 
     with gr.Blocks(css=customCSS) as demo:
         gr.Markdown(f"# &#x1F50E; FIND: Interfacing Foundation Models' Embeddings")
@@ -639,7 +716,7 @@ def main(args=None):
                     ["A green and white leafy potted plant", None, None, None, None, "sits near", "a cozy bed with a blue comforter", None, None, None, None, "creating a relaxing atmosphere in the bedroom"]
                     ],
             inputs=[*input_list],
-            outputs=gallery_output,
+            outputs=[gallery_output, None],
             cache_examples=False,
             label='Image Retrieval & Grounding'
         )
@@ -649,9 +726,21 @@ def main(args=None):
                     [None, "assets/images/dog.jpg", None, None, None, "is sitting on", "a wooden bench", None, None, None, None, None]
                     ],
             inputs=[*input_list],
-            outputs=gallery_output,
+            outputs=[gallery_output, None],
             cache_examples=False,
             label='Interleave Retrieval & Grounding'
+        )
+
+        example5 = gr.Examples(
+            examples=[
+                    ["large language model", None, None, None, None, None, None, None, None, None, None, None],
+                    ["3d difussion model", None, None, None, None, None, None, None, None, None, None, None],
+                    ["self-supervised learning", None, None, None, None, None, None, None, None, None, None, None],
+                    ],
+            inputs=[*input_list],
+            outputs=[None, gallery_output2],
+            cache_examples=False,
+            label='ICLR2024 Abstract Retrieval (*Add Text Entity in Query*)',
         )
 
         gr.Markdown(f"### 👉 Query.")
@@ -686,11 +775,14 @@ def main(args=None):
         #     text_content = gr.Textbox(label="paragraph.", lines=7)
 
         with gr.Row():
-            search_space = gr.CheckboxGroup(["image_coco_val2017", "paragraph_coco_val2017"], label="Search Space.", value=["image_coco_val2017"])
-            run.click(inference, [search_space] + [*input_list], [gallery_output])
+            search_space = gr.CheckboxGroup(["image_coco_val2017", "paragraph_coco_val2017", "iclr_abstract"], label="Search Space.", value=["iclr_abstract"])
+            run.click(inference, [search_space] + [*input_list], [gallery_output, gallery_output2])
 
         gr.Markdown(f"### 👉 Results.")
-        gallery_output.render()
+        with gr.Tab("ICLR2024-Abstract"):
+            gallery_output2.render()
+        with gr.Tab("FIND-Bench"):
+            gallery_output.render()
 
         gr.Markdown(f"### 👉 Usage.")
         with gr.Row():
@@ -716,7 +808,7 @@ def main(args=None):
         #     addimage = gr.Button("Upload")
         #     addimage.click(add_image, [input_image1, input_image2, input_image3, input_image4, input_image5, input_image6])
 
-    demo.launch(server_port=7890)
+    demo.launch(server_port=6789)
 
 if __name__ == "__main__":
     main()
