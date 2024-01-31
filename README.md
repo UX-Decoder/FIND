@@ -1,5 +1,5 @@
 # 🔍 FIND: Interface Foundation Models' Embeddings
-:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net/)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
+:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net:6789)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
 
 We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**ings in an interleaved shared embedding space. Below is a brief introduction of all the generic and interleave tasks we can do!
 
@@ -13,15 +13,28 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 
 ## :bookmark_tabs: Catalog
 - [x] Demo Code
-- [ ] Model Checkpoint
+- [x] Model Checkpoint
 - [ ] Comprehensive User Guide
-- [ ] Dataset
+- [x] Dataset
 - [x] Training Code
 - [x] Evaluation Code
 
 
 ## :hammer: Getting Started
 
+## :coconut: Dataset
+| entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
+|-----------------------|---------------------|--------------------------|
+| [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017_long.json)                 |
+
+## :kiwi_fruit: Checkpoint
+|                   |          | COCO-Entity |      |      |       | COCO-Entity-Long |      |      |       |
+|-------------------|----------|-------------|------|------|-------|------------------|------|------|-------|
+|                   |          | cIoU        | AP50 | IR@5 | IR@10 | cIoU             | AP50 | IR@5 | IR@10 |
+| ImageBIND (H)     | -        | -           | -    | 51.4 | 61.3  | -                | -    | 58.7 | 68.9  |
+| Grounding-SAM (H) | -        | 58.9        | 63.2 | -    | -     | 56.1             | 62.5 | -    | -     |
+| Focal-T           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/grin_focalt_llama_x640.pt) | 74.9        | 79.5 | 43.5 | 57.1  | 73.2             | 77.7 | 49.4 | 63.9  |
+| Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/grin_focall_llama_x640.pt) |             |      |      |       |                  |      |      |       |
 
 ## :mushroom: Demo
 * **Example Output**
