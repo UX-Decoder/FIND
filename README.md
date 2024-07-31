@@ -75,12 +75,16 @@ data/
 
 **Run Training**
 
-## :coconut: Dataset
+## 🗂️ Dataset
+Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/xueyanz/FIND-Bench).
+
+**Download Raw File:**
 | entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
 |-----------------------|---------------------|--------------------------|
-| [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/xueyanz/FIND/resolve/main/entity_val2017_long.json)                 |
+| [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json)                 |
 
-## :kiwi_fruit: Checkpoint
+
+## ⛳ Checkpoint
 |                   |          | COCO-Entity |      |      |       | COCO-Entity-Long |      |      |       |
 |-------------------|----------|-------------|------|------|-------|------------------|------|------|-------|
 |                   |          | cIoU        | AP50 | IR@5 | IR@10 | cIoU             | AP50 | IR@5 | IR@10 |
@@ -89,7 +93,7 @@ data/
 | Focal-T           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focalt_llama_x640.pt) | 74.9        | 79.5 | 43.5 | 57.1  | 73.2             | 77.7 | 49.4 | 63.9  |
 | Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focall_llama_x640.pt) |             |      |      |       |                  |      |      |       |
 
-## :mushroom: Demo
+## 🧑‍💻 Demo
 * **Example Output**
 
 <img width="400" alt="Screenshot 2023-12-13 at 10 28 05 AM" src="https://github.com/UX-Decoder/FIND/assets/11957155/48d84fb9-160c-4113-b50b-e7872dcde544">
