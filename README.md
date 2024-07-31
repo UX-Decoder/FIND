@@ -22,8 +22,20 @@ by [Xueyan Zou](https://maureenzou.github.io/), [Linjie Li](https://scholar.goog
 - [x] Evaluation Code
 
 ## :hammer: Getting Started
-* **Build Environment**
 
+<details open>
+<summary>Install Conda</summary>
+<pre>
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda
+eval "$($HOME/miniconda/bin/conda shell.bash hook)"
+conda init
+conda init zsh
+</pre>
+</details>
+
+**Build Environment**
 ```
 conda create --name find python=3.10
 conda activate find
@@ -37,9 +49,9 @@ cd modeling/vision/encoder/ops
 sh make.sh
 cd ../../..
 ```
+**Build Dataset**
 
-* **Build Dataset**
-* **Run Demo**
+**Run Demo**
 
 ## :coconut: Dataset
 | entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
