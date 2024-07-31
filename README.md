@@ -71,6 +71,10 @@ data/
 
 **Run Demo**
 
+**Run Evaluation**
+
+**Run Training**
+
 ## :coconut: Dataset
 | entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
 |-----------------------|---------------------|--------------------------|
