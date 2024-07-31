@@ -5,7 +5,7 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 
 by [Xueyan Zou](https://maureenzou.github.io/), [Linjie Li](https://scholar.google.com/citations?user=WR875gYAAAAJ&hl=en), [Jianfeng Wang](http://jianfengwang.me/), [Jianwei Yang](https://jwyang.github.io/), [Mingyu Ding](https://dingmyu.github.io/), [Junyi Wei](https://scholar.google.com/citations?user=Kb1GL40AAAAJ&hl=en), [Zhengyuan Yang](https://zyang-ur.github.io/), [Feng Li](https://fengli-ust.github.io/), [Hao Zhang](https://scholar.google.com/citations?user=B8hPxMQAAAAJ&hl=en), [Shilong Liu](https://lsl.zone/), [Arul Aravinthan](https://www.linkedin.com/in/arul-aravinthan-414509218/), [Yong Jae Lee*](https://pages.cs.wisc.edu/~yongjaelee/), [Lijuan Wang*](https://scholar.google.com/citations?user=cDcWXuIAAAAJ&hl=zh-CN), 
 
-\* Equal Advising
+** Equal Advising **
 
 ![FIND design](assets/images/teaser.jpg?raw=true)
 
@@ -49,7 +49,25 @@ cd modeling/vision/encoder/ops
 sh make.sh
 cd ../../..
 ```
+
 **Build Dataset**
+<details open>
+<summary>Data Structure</summary>
+<pre>
+data/
+└── coco/
+    ├── annotations/
+    │   ├── entity_train2017.json
+    │   ├── entity_val2017.json
+    │   └── entity_val2017_long.json
+    ├── panoptic_semseg_train2017/
+    ├── panoptic_semseg_val2017/
+    ├── panoptic_train2017/
+    ├── panoptic_val2017/
+    ├── train2017/
+    └── val2017/
+</pre>
+</details>
 
 **Run Demo**
 
