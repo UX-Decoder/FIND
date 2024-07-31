@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 # Define Test/Trainer/Saving
-PIPELINE: GRINPipeline
+PIPELINE: FINDPipeline
 TRAINER: xdecoder
 SAVE_DIR: '../../data/output/test'
 base_path: "./"
@@ -37,7 +37,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: grin_model
+  NAME: find_model
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -45,28 +45,25 @@ MODEL:
   DIM_PROJ: 512
   BACKBONE_DIM: 768
   TEXT:
-    ARCH: vlpencoder
-    NAME: transformer
+    ARCH: llamaencoder
+    NAME: huggyllama/llama-7b
     TOKENIZER: clip
     CONTEXT_LENGTH: 77 # 77
-    WIDTH: 512
-    HEADS: 8
-    LAYERS: 12 # 6
-    FEATURE_LAYER: -1
-    AUTOGRESSIVE: True
+    STOP_TOKEN: "###"
+    WIDTH: 4096
+    FEATURE_LAYER: -12
     LOAD_TENSOR: False
     PRECOMPUTE: False
-    PRETRAINED: ''
   BACKBONE:
-    NAME: focal
+    NAME: focal_dw
     PRETRAINED: ''
     LOAD_PRETRAINED: false
     FOCAL:
       PRETRAIN_IMG_SIZE: 224
       PATCH_SIZE: 4
-      EMBED_DIM: 192
-      DEPTHS: [2, 2, 18, 2]
-      FOCAL_LEVELS: [4, 4, 4, 4]
+      EMBED_DIM: 96
+      DEPTHS: [2, 2, 6, 2]
+      FOCAL_LEVELS: [3, 3, 3, 3]
       FOCAL_WINDOWS: [3, 3, 3, 3]
       DROP_PATH_RATE: 0.3
       MLP_RATIO: 4.0
@@ -93,11 +90,11 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: grin
+    NAME: find
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True
-      CLASS_TOKEN_LENGTH: 77
+      CLASS_TOKEN_LENGTH: 150
     DETECTION: False
     SPATIAL:
       ENABLED: True

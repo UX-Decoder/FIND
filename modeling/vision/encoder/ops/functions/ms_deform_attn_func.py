@@ -23,7 +23,7 @@ try:
 except ModuleNotFoundError as e:
     info_string = (
         "\n\nPlease compile MultiScaleDeformableAttention CUDA op with the following commands:\n"
-        "\t`cd mask2former/modeling/pixel_decoder/ops`\n"
+        "\t`cd modeling/vision/encoder/ops`\n"
         "\t`sh make.sh`\n"
     )
     raise ModuleNotFoundError(info_string)

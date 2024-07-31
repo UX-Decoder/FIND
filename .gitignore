@@ -95,24 +95,6 @@ external/
 MODELS
 MODELS/*
 
-inference_xdecoder.sh
-eval_grin.sh
-eval_seem.sh
-eval_xdecoder.sh
-train_grin.sh
-train_seem_v0.sh
-train_seem.sh
-train_xdecoder.sh
-demo_grin_llama.sh
-demo_grin_unicl.sh
-infer_lang_grin.sh
-train_samb_grin.sh
-eval_gsam.sh
-eval_sam.sh
-eval_xdecoder_interleave.sh
-eval_seem_interleave.sh
-compute_grin_visual.sh
-
 draws/
 plot/
 
@@ -123,4 +105,5 @@ exps/*
 *.pt
 *.pth
 *.da
-iclr2024_stat.json
+
+*scripts/*

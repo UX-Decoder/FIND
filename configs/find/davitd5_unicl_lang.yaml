@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 # Define Test/Trainer/Saving
-PIPELINE: GRINPipeline
+PIPELINE: FINDPipeline
 TRAINER: xdecoder
 SAVE_DIR: '../../data/output/test'
 base_path: "./"
@@ -37,7 +37,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: grin_model
+  NAME: find_model
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -45,15 +45,18 @@ MODEL:
   DIM_PROJ: 512
   BACKBONE_DIM: 768
   TEXT:
-    ARCH: llamaencoder
-    NAME: huggyllama/llama-7b
+    ARCH: vlpencoder
+    NAME: transformer
     TOKENIZER: clip
     CONTEXT_LENGTH: 77 # 77
-    STOP_TOKEN: "###"
-    WIDTH: 4096
-    FEATURE_LAYER: -12
+    WIDTH: 512
+    HEADS: 8
+    LAYERS: 12 # 6
+    FEATURE_LAYER: -1
+    AUTOGRESSIVE: True
     LOAD_TENSOR: False
     PRECOMPUTE: False
+    PRETRAINED: ''
   BACKBONE:
     NAME: davit
     PRETRAINED: ''
@@ -61,13 +64,13 @@ MODEL:
     PRETRAINED_LAYERS: '*'
     DAVIT:
       DROP_PATH_RATE: 0.3
-      PATCH_SIZE: [7, 2, 2, 2]
+      PATCH_SIZE: [7, 3, 3, 3]
       PATCH_STRIDE: [4, 2, 2, 2]
-      PATCH_PADDING: [3, 0, 0, 0]
+      PATCH_PADDING: [3, 1, 1, 1]
       PATCH_PRENORM: [false, true, true, true]
-      DIM_EMBED: [128, 256, 512, 1024]
-      NUM_HEADS: [4, 8, 16, 32]
-      NUM_GROUPS: [4, 8, 16, 32]
+      DIM_EMBED: [256, 512, 1024, 2048]
+      NUM_HEADS: [8, 16, 32, 64]
+      NUM_GROUPS: [8, 16, 32, 64]
       DEPTHS: [1, 1, 9, 1]
       OUT_FEATURES: ["res2", "res3", "res4", "res5"]
       OUT_INDICES: [0, 1, 2, 3]
@@ -85,11 +88,11 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: grin
+    NAME: find
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True
-      CLASS_TOKEN_LENGTH: 150
+      CLASS_TOKEN_LENGTH: 77
     DETECTION: False
     SPATIAL:
       ENABLED: True

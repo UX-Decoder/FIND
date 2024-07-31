@@ -4,7 +4,7 @@ import torch
 logger = logging.getLogger(__name__)
 
 def hook_opt(opt):
-    logger.warning('Need to make the name of SEEM and GRIN compatible.')
+    logger.warning('Need to make the name of SEEM and FIND compatible.')
     grounding_flag, spatial_flag = False, False
     if 'seem_model' in opt['MODEL']['NAME']:
         grounding_flag = opt['REF']['INPUT']['SPATIAL']

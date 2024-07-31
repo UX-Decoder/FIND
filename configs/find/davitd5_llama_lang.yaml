@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 # Define Test/Trainer/Saving
-PIPELINE: GRINPipeline
+PIPELINE: FINDPipeline
 TRAINER: xdecoder
 SAVE_DIR: '../../data/output/test'
 base_path: "./"
@@ -37,7 +37,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: grin_model
+  NAME: find_model
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -55,28 +55,23 @@ MODEL:
     LOAD_TENSOR: False
     PRECOMPUTE: False
   BACKBONE:
-    NAME: focal
+    NAME: davit
     PRETRAINED: ''
     LOAD_PRETRAINED: false
-    FOCAL:
-      PRETRAIN_IMG_SIZE: 224
-      PATCH_SIZE: 4
-      EMBED_DIM: 192
-      DEPTHS: [2, 2, 18, 2]
-      FOCAL_LEVELS: [4, 4, 4, 4]
-      FOCAL_WINDOWS: [3, 3, 3, 3]
+    PRETRAINED_LAYERS: '*'
+    DAVIT:
       DROP_PATH_RATE: 0.3
-      MLP_RATIO: 4.0
-      DROP_RATE: 0.0
-      PATCH_NORM: True
-      USE_CONV_EMBED: True
-      SCALING_MODULATOR: True
-      USE_CHECKPOINT: False
-      USE_POSTLN: true
-      USE_POSTLN_IN_MODULATION: false
-      USE_LAYERSCALE: True
+      PATCH_SIZE: [7, 3, 3, 3]
+      PATCH_STRIDE: [4, 2, 2, 2]
+      PATCH_PADDING: [3, 1, 1, 1]
+      PATCH_PRENORM: [false, true, true, true]
+      DIM_EMBED: [256, 512, 1024, 2048]
+      NUM_HEADS: [8, 16, 32, 64]
+      NUM_GROUPS: [8, 16, 32, 64]
+      DEPTHS: [1, 1, 9, 1]
       OUT_FEATURES: ["res2", "res3", "res4", "res5"]
       OUT_INDICES: [0, 1, 2, 3]
+      ENABLE_CHECKPOINT: False
   ENCODER:
     NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255
@@ -90,7 +85,7 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: grin
+    NAME: find
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True

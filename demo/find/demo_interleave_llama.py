@@ -1,229 +1,26 @@
 import sys
-
-pth = '/'.join(sys.path[0].split('/')[:-2])
-sys.path.insert(0, pth)
-
-import sys
 import os
-import PIL
-from PIL import Image, ImageDraw, ImageFont
-import textwrap
-import string
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+
+from PIL import Image
 
 import numpy as np
-import cv2
 
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
 
 import gradio as gr
-from gradio import processing_utils
 from detectron2.structures import Boxes, ImageList, Instances, BitMasks
 from detectron2.data import MetadataCatalog
 from utils.dataset import Entity
-from transformers import AutoTokenizer, LlamaForCausalLM
+from transformers import AutoTokenizer
 
-from modeling.language.Tokenizer.custom_tokenizer import split_by_ordered_substrings
 from utils.arguments import load_opt_command
-from utils.visualizer import Visualizer
 from trainer import XDecoder_Trainer as Trainer
 from trainer.utils.misc import move_batch_to_device, cast_batch_to_half
 
-colors = [
-    [127, 255, 0],   # Bright Lime
-    [255, 128, 0],   # Bright Orange
-    [0, 127, 255],   # Bright Sky Blue
-    [255, 0, 127],   # Bright Pink
-    [127, 0, 255],   # Bright Violet
-    [255, 127, 0],   # Bright Amber
-    [0, 255, 127],   # Bright Spring Green
-    [255, 0, 0],     # Bright Red
-    [0, 255, 0],     # Bright Green
-    [0, 0, 255],     # Bright Blue
-    [255, 255, 0],   # Bright Yellow
-    [0, 255, 255],   # Bright Cyan
-    [255, 0, 255],   # Bright Magenta
-]
+from .utils import draw_text_on_image_with_score, put_text, draw_instances, colors
 
-def make_color_lighter(color, percentage=0.5):
-    # Ensure the percentage is between 0 and 1
-    percentage = max(min(percentage, 1), 0)
-    
-    # Parse the color string into an RGB tuple
-    rgb = tuple(map(int, color.strip('[]').split(',')))
-    
-    # Calculate the new color by moving the original color towards white by the given percentage
-    lighter_rgb = tuple(int((1 - percentage) * c + percentage * 255) for c in rgb)
-    return lighter_rgb
-
-def draw_text_on_image_with_score(sentence, entities, ei_scores_text, top=1):
-    # Store high light dict
-    topk_scores, topk_tokens = ei_scores_text.topk(top, dim=-1)
-    highlight_dict = {}
-    for idx, token_ids in enumerate(topk_tokens):
-        color = colors[idx]
-        text_list = [entities[token_id.item()].text for token_id in token_ids]
-        index_list = [[sentence.index(_str), sentence.index(_str)+len(_str)] for _str in text_list]
-        index_list.sort(key=lambda x: x[0])
-        highlight_dict[str(color)] = index_list
-
-    sorted_highlight_items = sorted(highlight_dict.items(), key=lambda item: item[1][0][0])
-    highlight_dict = {k: v for k, v in sorted_highlight_items}
-
-    # Load a high-quality truetype font
-    font_path = "./demo/grin/arial.ttf"  # Update this to the path of the font file you want to use
-    font_size = 20           # You can adjust this size to your preference
-
-    try:
-        font = ImageFont.truetype(font_path, font_size)
-    except IOError:
-        print("Font file not found. Falling back to default font.")
-        font = ImageFont.load_default()
-
-    width, height = 350, 250
-    image = Image.new('RGB', (width, height), color='white')
-    # Initialize the drawing context with the image as background
-    draw = ImageDraw.Draw(image)
-
-    # Define starting position
-    x, y = 10, 10
-    width_limit = width - 20
-    space_width = draw.textbbox((0, 0), ' ', font=font)[2]
-    words = sentence.split()
-    word_lengths = [draw.textbbox((0, 0), word, font=font)[2] for word in words]
-
-    current_line_length = 0
-    lines = []
-    line = []
-    for word, word_length in zip(words, word_lengths):
-        if current_line_length + word_length <= width_limit:
-            line.append(word)
-            current_line_length += word_length + space_width
-        else:
-            lines.append(' '.join(line))
-            line = [word]
-            current_line_length = word_length + space_width
-    lines.append(' '.join(line))  # Add the last line
-    
-    for line in lines:
-        
-        line_length = draw.textbbox((0,0), line, font=font)[2]
-        line_highlight_ranges = []
-        
-        # Calculate the positions for highlights
-        start_idx = sentence.find(line)
-        end_idx = start_idx + len(line)
-        
-        for color, ranges in highlight_dict.items():
-            for range_start, range_end in ranges:
-                if range_start < end_idx and range_end > start_idx:
-                    line_highlight_ranges.append((
-                        max(range_start, start_idx) - start_idx,
-                        min(range_end, end_idx) - start_idx,
-                        color
-                    ))
-        
-        # Draw the highlights
-        offset = 0
-        for start, end, color in line_highlight_ranges:
-            highlight_text = sentence[start_idx + offset:start_idx + start]
-            draw.text((x, y), highlight_text, font=font, fill='black')
-            x += draw.textbbox((0,0), highlight_text, font=font)[2]
-            
-            highlight_text = sentence[start_idx + start:start_idx + end]
-            color_tuple = make_color_lighter(color)
-            draw.rectangle(((x, y), (x + draw.textbbox((0,0), highlight_text, font=font)[2], y + font_size)), fill=color_tuple)
-            draw.text((x, y), highlight_text, font=font, fill='black')
-            x += draw.textbbox((0,0), highlight_text, font=font)[2]
-            offset = end
-        
-        # Draw the rest of the line
-        remaining_text = sentence[start_idx + offset:end_idx]
-        draw.text((x, y), remaining_text, font=font, fill='black')
-        y += font.getbbox(line)[3]  # Move to the next line
-        x = 10  # Reset x position
-
-    # image.save("test.png")
-    # import pdb; pdb.set_trace()
-    return image
-
-def debug():
-    draw_text_on_image_with_score(torch.load("sentence.da"), torch.load("entities.da"), torch.load("ei_scores_text.da"))
-
-def put_text(image_draw, phrases):
-    # image_draw is your actual image.
-    # phrases is a list of dictionaries with 'text' and 'color' keys
-
-    # Choose your font
-    font = cv2.FONT_HERSHEY_DUPLEX
-    # Choose the size of your font
-    font_scale = 0.4
-    # Choose the thickness of the font
-    thickness = 1
-
-    # set the text start position
-    text_offset_x = 10
-    text_offset_y = image_draw.shape[0] + 10  # start from 10 pixels below the bottom of the image
-
-    # Initialize some variables for the maximum text width and the total text height
-    total_text_height = 10  # start with padding for the bottom of the image
-
-    # Calculate total_text_height
-    for phrase in phrases:
-        _str = phrase['text']
-        (_, text_height) = cv2.getTextSize(_str, font, font_scale, thickness)[0]
-        total_text_height += text_height + 10  # add padding between phrases
-
-    # Make a canvas to fit the image and the text
-    canvas = np.ones((image_draw.shape[0] + total_text_height, image_draw.shape[1], 3), dtype='uint8') * 248
-
-    # Copy the image to the canvas
-    canvas[:image_draw.shape[0], :image_draw.shape[1]] = image_draw
-
-    # Add each phrase to the canvas
-    for phrase in phrases:
-        _str = phrase['text']
-        color = phrase['color']
-
-        # Use getTextSize to get the width and height of the text box
-        (_, text_height) = cv2.getTextSize(_str, font, font_scale, thickness)[0]
-
-        # Add text to the canvas
-        cv2.putText(canvas, _str, (text_offset_x, text_offset_y + text_height), font, font_scale, color, thickness)
-
-        # Update the y position for next text
-        text_offset_y += text_height + 10  # 10 is the vertical space between phrases
-
-    return canvas
-
-def draw_instances(image, instances):
-    """
-    Draw bounding boxes, overlay masks and add class labels on the image.
-
-    Parameters:
-    - image: numpy array of shape (H, W, C)
-    - instances: an object with the following attributes
-        - gt_masks: a tensor of shape (N, H, W), where N is the number of instances
-        - gt_boxes: a tensor of shape (N, 4), where each row is (x1, y1, x2, y2)
-        - gt_classes: a list of N class labels
-    """
-
-    # For each instance
-    for i in range(len(instances.gt_classes)):
-        # Get a random color
-        color = colors[i]
-
-        # Draw the bounding box
-        x1, y1, x2, y2 = instances.gt_boxes.tensor[i].int().numpy()
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
-
-        color = np.array(color)[None, None, :]
-        mask = instances.gt_masks.tensor[i].numpy()[:,:,None]
-        overlay = mask * color
-        image = image * (1 - mask) + (image * mask * 0.5 + overlay * 0.5)
-    return image
 
 def main(args=None):
     '''
@@ -235,78 +32,27 @@ def main(args=None):
         opt['user_dir'] = absolute_user_dir
 
     # META DATA
-    # pretrained_pth = "/nobackup3/xueyan-data/grin_data/output/grin_focalt_enc6_fpn_dec10_llama_lang_bsc192_cis640_ep50_fbTrue_flTrue_feTrue_mkTrue_capFalse_intTrue_inlTrue_retTrue_grdTrue_tfl-12_inlp0.5_maxsi0_tg6_ts6_tr6_ti6_ltTrue_qclass_qgrd_qmspa_qint/00029300/"
-    pretrained_pth = "/nobackup3/xueyan-data/grin_data/output/grin_davitd5_enc6_fpn_dec10_llama_lang_bsc192_cis640_ep50_fbTrue_flTrue_feTrue_mkTrue_capFalse_intTrue_inlTrue_retTrue_grdTrue_tfl-12_inlp0.5_maxsi0_tg6_ts6_tr6_ti6_ltTrue_qclass_qgrd_qmspa_qint/00029300/"
-    database_root = "../../data/output/database"
-    coco_folders = ["/nobackup3/xueyan-data/grin_data/coco/train2017", "/nobackup3/xueyan-data/grin_data/coco/val2017", database_root]
-    # paragraph_path = "/nobackup3/xueyan-data/grin_data/coco/annotations/entity_val2017_long.json"
+    pretrained_pth = opt["RESUME_FROM"]
+    debug = opt["FAKE_UPDATE"]
+    data_root = os.getenv('DETECTRON2_DATASETS')
+    coco_folders = [os.path.join(data_root, "coco/train2017"), os.path.join(data_root, "coco/val2017")]
+
+    # The code support add your own database, feel free to uncomment and figure it out.
     add_image_pths = []
-    add_image_id = 0
+    # database_root = "/tmp/database"
+    # add_image_id = 0
 
     # hard code interactive token number
     opt['DATASETS']['TEST'] += ['vlp_coco_entity_val_long']
 
     trainer = Trainer(opt)
     raw_models = trainer.pipeline.initialize_model()
-    model = raw_models['default'].from_pretrained(os.path.join(pretrained_pth, 'default', 'model_state_dict.pt')).eval()
+    model = raw_models['default'].from_pretrained(pretrained_pth).eval()
     model = model.cuda()
     
     # build language tokenizer
     tokenizer = AutoTokenizer.from_pretrained("huggyllama/llama-7b", padding_side='right')
     tokenizer.pad_token = tokenizer.eos_token
-
-    # prepare abstract data
-    import json
-    with open("./iclr2024_stat.json") as f:
-        abstract_data = json.load(f)
-
-    title_embed_list = []
-    abstract_embed_list = []
-    title_list = []
-    avg_score_list = []
-    papers = abstract_data['papers']
-    with torch.no_grad():
-        with torch.autocast(device_type='cuda', dtype=torch.float16):
-            model.model.get_class_embeddings(["default", "default"], is_eval=True)
-
-            for bidx, paper in enumerate(papers):
-                print(bidx)
-                title = paper['title']
-                abstract = paper['abstract']
-
-                title_tokens = tokenizer(
-                    [title], padding='max_length', truncation=True, max_length=77, return_tensors='pt'
-                )
-                batched_inputs = [{'tokens': {'input_ids': title_tokens['input_ids'].cuda(), 'attention_mask': title_tokens['attention_mask'].cuda()},
-                                    'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
-                outputs = model.model.demo_retrieval(batched_inputs)
-                title_embed_list += [outputs['pred_retrievals_lang'][0]]
-
-                abs_tokens = tokenizer(
-                    [abstract], padding='max_length', truncation=True, max_length=150, return_tensors='pt'
-                )
-                batched_inputs = [{'tokens': {'input_ids': abs_tokens['input_ids'].cuda(), 'attention_mask': abs_tokens['attention_mask'].cuda()},
-                                    'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
-                outputs = model.model.demo_retrieval(batched_inputs)
-                abstract_embed_list += [outputs['pred_retrievals_lang'][0]]
-
-                ranks = []
-                for review in paper['reviews']:
-                    ranks += [int(review['rating'].split(':')[0])]
-                if len(ranks) == 0:
-                    avg_ranks = 0
-                else:
-                    avg_ranks = sum(ranks) / len(ranks)
-                title_list += [title + ". Avg Score: {}, Ratings: {}".format(str(avg_ranks)[0:4], ranks)]
-                avg_score_list += [avg_ranks]
-
-                # if bidx == 100:
-                #     break
-
-    title_embed_list = torch.cat(title_embed_list, dim=0)
-    title_embed_list = title_embed_list / title_embed_list.norm(dim=-1, keepdim=True)
-    abstract_embed_list = torch.cat(abstract_embed_list, dim=0)
-    abstract_embed_list = abstract_embed_list / abstract_embed_list.norm(dim=-1, keepdim=True)
 
     interleave_text_list = []
     interleave_entity_list = []
@@ -354,8 +100,8 @@ def main(args=None):
                 interleave_entity_list += [{"pred_entity_class": pred_entity_class, "sentence": sentence, "entities": entities}]
                 interleave_text_list += [pred_interleave_class]
 
-                # if bidx == 10:
-                #     break
+                if bidx == 40 and debug:
+                    break
 
     interleave_text_long = torch.cat(interleave_text_list, dim=0)[:,0]
     interleave_text_long = interleave_text_long / interleave_text_long.norm(dim=-1, keepdim=True)
@@ -387,8 +133,8 @@ def main(args=None):
                 object_class_emb_list += [outputs['pred_captions']]
                 object_pixel_emb_list += [outputs['pred_maskembs']]
 
-                # if idx == 10:
-                #     break
+                if idx == 40 and debug:
+                    break
 
             image_embs_class = torch.cat(image_class_emb_list, dim=0)
             image_embs_class = image_embs_class / image_embs_class.norm(dim=-1, keepdim=True)
@@ -402,51 +148,51 @@ def main(args=None):
     transform = transforms.Compose(t)
     metadata = MetadataCatalog.get('coco_2017_train_panoptic')
 
-    def add_image(*args):
-        nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, add_image_id
+    # def add_image(*args):
+    #     nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, add_image_id
 
-        with torch.no_grad():
-            with torch.autocast(device_type='cuda', dtype=torch.float16):
-                image_class_emb_list = []
-                object_class_emb_list = []
-                object_pixel_emb_list = []
-                for idx, _input in enumerate(args):
-                    if _input is not None:
-                        pil_image = Image.fromarray(_input)
-                        save_pth = os.path.join(database_root, str(add_image_id).zfill(12) + "_add.jpg")
-                        pil_image.save(save_pth)
-                        add_image_pths += [save_pth]
-                        image_ori = transform(pil_image)
-                        image_ori = np.asarray(image_ori)
-                        images = torch.from_numpy(image_ori.copy()).permute(2,0,1).cuda()
-                        images = [images.to(model.model.device)]
-                        images = [(x - model.model.pixel_mean) / model.model.pixel_std for x in images]
-                        images = ImageList.from_tensors(images, model.model.size_divisibility)
+    #     with torch.no_grad():
+    #         with torch.autocast(device_type='cuda', dtype=torch.float16):
+    #             image_class_emb_list = []
+    #             object_class_emb_list = []
+    #             object_pixel_emb_list = []
+    #             for idx, _input in enumerate(args):
+    #                 if _input is not None:
+    #                     pil_image = Image.fromarray(_input)
+    #                     save_pth = os.path.join(database_root, str(add_image_id).zfill(12) + "_add.jpg")
+    #                     pil_image.save(save_pth)
+    #                     add_image_pths += [save_pth]
+    #                     image_ori = transform(pil_image)
+    #                     image_ori = np.asarray(image_ori)
+    #                     images = torch.from_numpy(image_ori.copy()).permute(2,0,1).cuda()
+    #                     images = [images.to(model.model.device)]
+    #                     images = [(x - model.model.pixel_mean) / model.model.pixel_std for x in images]
+    #                     images = ImageList.from_tensors(images, model.model.size_divisibility)
                         
-                        targets = targets_grounding = queries_grounding = None
-                        features = model.model.backbone(images.tensor)
-                        outputs = model.model.sem_seg_head(features, target_queries=queries_grounding)
-                        image_class_emb_list += [outputs['pred_retrievals'][:,0]]
-                        object_class_emb_list += [outputs['pred_captions']]
-                        object_pixel_emb_list += [outputs['pred_maskembs']]
-                        image_ids += [save_pth]
-                        add_image_id += 1
+    #                     targets = targets_grounding = queries_grounding = None
+    #                     features = model.model.backbone(images.tensor)
+    #                     outputs = model.model.sem_seg_head(features, target_queries=queries_grounding)
+    #                     image_class_emb_list += [outputs['pred_retrievals'][:,0]]
+    #                     object_class_emb_list += [outputs['pred_captions']]
+    #                     object_pixel_emb_list += [outputs['pred_maskembs']]
+    #                     image_ids += [save_pth]
+    #                     add_image_id += 1
 
-                if len(image_class_emb_list) > 0:
-                    add_image_class_embs = torch.cat(image_class_emb_list, dim=0)
-                    add_image_class_embs = add_image_class_embs / add_image_class_embs.norm(dim=-1, keepdim=True)
-                    image_embs_class = torch.cat([image_embs_class, add_image_class_embs], dim=0)
+    #             if len(image_class_emb_list) > 0:
+    #                 add_image_class_embs = torch.cat(image_class_emb_list, dim=0)
+    #                 add_image_class_embs = add_image_class_embs / add_image_class_embs.norm(dim=-1, keepdim=True)
+    #                 image_embs_class = torch.cat([image_embs_class, add_image_class_embs], dim=0)
 
-                    add_object_class_embs = torch.cat(object_class_emb_list, dim=0)
-                    add_object_class_embs = add_object_class_embs / add_object_class_embs.norm(dim=-1, keepdim=True)
-                    object_embs_class = torch.cat([object_embs_class, add_object_class_embs], dim=0)
+    #                 add_object_class_embs = torch.cat(object_class_emb_list, dim=0)
+    #                 add_object_class_embs = add_object_class_embs / add_object_class_embs.norm(dim=-1, keepdim=True)
+    #                 object_embs_class = torch.cat([object_embs_class, add_object_class_embs], dim=0)
 
-                    add_object_pixel_embs = torch.cat(object_pixel_emb_list, dim=0)
-                    # add_object_pixel_embs = add_object_pixel_embs / add_object_pixel_embs.norm(dim=-1, keepdim=True)
-                    object_embs_pixel = torch.cat([object_embs_pixel, add_object_pixel_embs], dim=0)
+    #                 add_object_pixel_embs = torch.cat(object_pixel_emb_list, dim=0)
+    #                 # add_object_pixel_embs = add_object_pixel_embs / add_object_pixel_embs.norm(dim=-1, keepdim=True)
+    #                 object_embs_pixel = torch.cat([object_embs_pixel, add_object_pixel_embs], dim=0)
 
     def inference(search_space, *args):
-        nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths, interleave_text_long, interleave_entity_list, title_embed_list, title_list, abstract_embed_list
+        nonlocal model, image_embs_class, object_embs_pixel, object_embs_class, image_ids, transform, metadata, add_image_pths
 
         # offset 0 is entity_text, offset 1 is entity_image, offset 2 is connection
         sentence = ''
@@ -510,28 +256,6 @@ def main(args=None):
         with torch.no_grad():
             with torch.autocast(device_type='cuda', dtype=torch.float16):
 
-                if 'iclr_abstract' in search_space:
-                    title = entities[0].text
-                    title_tokens = tokenizer(
-                        [title], padding='max_length', truncation=True, max_length=77, return_tensors='pt'
-                    )
-                    batched_inputs = [{'tokens': {'input_ids': title_tokens['input_ids'].cuda(), 'attention_mask': title_tokens['attention_mask'].cuda()},
-                                        'captions': [title], 'image': torch.zeros((3,224,224), device='cuda')}]
-                    outputs = model.model.demo_retrieval(batched_inputs)
-                    query = outputs['pred_retrievals_lang'][0]
-                    query = query / query.norm(dim=-1, keepdim=True)
-
-                    query_scores = query @ abstract_embed_list.t() + query @ title_embed_list.t() * 0.5
-                    max_id = query_scores.topk(20, dim=-1).indices[0]
-                    output_text = ""
-                    avg_score = []
-                    for idx in max_id:
-                        output_text += title_list[idx] + "\n"
-                        avg_score += [avg_score_list[idx]]
-                    avg_score = sum(avg_score) / len(avg_score)
-                    output_text = "Top 20 Avg Score: {} \n".format(str(avg_score)[0:4]) + output_text
-                    return None, output_text
-
                 sentence = sentence + '.'
                 tokens = tokenizer(
                     [sentence], padding='max_length', truncation=True, max_length=77, return_tensors='pt', return_offsets_mapping=True
@@ -545,16 +269,7 @@ def main(args=None):
                 data['entities'] = {"entities": entities, "sentence": sentence, "tokens": tokens, "entity_to_tokens": start_end_condition.cuda()}
                 outputs, extra = model.model.demo_interleave([data])
 
-                # interleave retrieval mode
-                # qc_emb = outputs["pred_entity_class"]
-                # i_emb_it = qc_emb / qc_emb.norm(dim=-1, keepdim=True)
-                # object_embs_class = object_embs_class / object_embs_class.norm(dim=-1, keepdim=True)
-
-                # bs,no,nd = object_embs_class.shape
-                # nq = i_emb_it.shape[1]
-                # ii_scores = (i_emb_it @ object_embs_class.reshape(1, bs*no, nd).transpose(1,2)).reshape(nq, bs, no).max(dim=-1)[0]
-
-                if 'paragraph_coco_val2017' in search_space:
+                if 'caption' in search_space:
                     interleave_emb = outputs['pred_interleave_image'][0]
                     interleave_emb = interleave_emb / interleave_emb.norm(dim=-1, keepdim=True)
                     pred_entity_class = outputs['pred_entity_class'][0]
@@ -573,7 +288,7 @@ def main(args=None):
                         image = draw_text_on_image_with_score(sentence, entities, ei_scores_text)
                         image_gallery += [image]
 
-                if 'image_coco_val2017' in search_space:
+                if 'image' in search_space:
                     # interleave proposals mode
                     ii_scores_list = []
                     for idx, entity in enumerate(entities):
@@ -634,17 +349,12 @@ def main(args=None):
 
                                 pred_masks = outputs['pred_masks']
 
-                                # visual_mask = pred_masks.cpu().numpy()
-                                # for i in range(visual_mask.shape[0]):
-                                #     cv2.imwrite(f"visual_mask_{i}.png", visual_mask[i] * 255)
-                                # import pdb; pdb.set_trace()
-
                                 image_shape = image_ori.shape[:2]
                                 instances = Instances(image_shape)
 
                                 if len(pred_masks) == 0:
                                     # Some image does not have annotation (all ignored)
-                                    masks = BitMasks(torch.zeros((0, pan_seg_gt.shape[-2], pan_seg_gt.shape[-1])))
+                                    masks = BitMasks(torch.zeros((0, image_shape[0], image_shape[1])))
                                     instances.gt_masks = masks
                                     instances.gt_boxes = Boxes(torch.zeros((0, 4)))
                                 else:
@@ -658,7 +368,7 @@ def main(args=None):
                                 image_gallery += [Image.fromarray(canvas).convert("RGB")]
                                 break
 
-        return image_gallery, None
+        return image_gallery
 
     # lastidx is the index to begin the offset from
     def change_visibility(inputType, last_idx):
@@ -731,18 +441,6 @@ def main(args=None):
             label='Interleave Retrieval & Grounding'
         )
 
-        example5 = gr.Examples(
-            examples=[
-                    ["large language model", None, None, None, None, None, None, None, None, None, None, None],
-                    ["3d difussion model", None, None, None, None, None, None, None, None, None, None, None],
-                    ["self-supervised learning", None, None, None, None, None, None, None, None, None, None, None],
-                    ],
-            inputs=[*input_list],
-            outputs=[None, gallery_output2],
-            cache_examples=False,
-            label='ICLR2024 Abstract Retrieval (*Add Text Entity in Query*)',
-        )
-
         gr.Markdown(f"### 👉 Query.")
         with gr.Row():
             last_idx = gr.State(value=0)
@@ -769,29 +467,21 @@ def main(args=None):
                             last_idx, *input_list])
             run = gr.Button("Run")
 
-        # gr.Markdown(f"### 👉 Database.")
-        # with gr.Row():
-        #     image_content = gr.Image(label="image.")
-        #     text_content = gr.Textbox(label="paragraph.", lines=7)
-
         with gr.Row():
-            search_space = gr.CheckboxGroup(["image_coco_val2017", "paragraph_coco_val2017", "iclr_abstract"], label="Search Space.", value=["iclr_abstract"])
-            run.click(inference, [search_space] + [*input_list], [gallery_output, gallery_output2])
+            search_space = gr.Radio(["image", "caption"], label="Retrieval & Grounding Search Space.", value="image")
+            run.click(inference, [search_space] + [*input_list], [gallery_output])
 
         gr.Markdown(f"### 👉 Results.")
-        with gr.Tab("ICLR2024-Abstract"):
-            gallery_output2.render()
-        with gr.Tab("FIND-Bench"):
-            gallery_output.render()
+        gallery_output.render()
 
         gr.Markdown(f"### 👉 Usage.")
         with gr.Row():
-            example3 = gr.Video(
+            gr.Video(
                 value="assets/videos/example1.mp4",
                 label='Image Retrieval & Grounding',
                 width=400,
             )
-            example4 = gr.Video(
+            gr.Video(
                 value="assets/videos/example2.mp4",
                 label='Interleave Retrieval & Grounding',
                 width=400,
@@ -808,7 +498,7 @@ def main(args=None):
         #     addimage = gr.Button("Upload")
         #     addimage.click(add_image, [input_image1, input_image2, input_image3, input_image4, input_image5, input_image6])
 
-    demo.launch(server_port=6789)
+    demo.launch(share=True)
 
 if __name__ == "__main__":
     main()

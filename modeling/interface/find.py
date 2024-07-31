@@ -1,5 +1,5 @@
 # --------------------------------------------------------
-# GRIN -- Grounding Interleaved Visual Understanding
+# FIND -- Interfacing Foundation Models' Embeddings
 # Licensed under The Apache License 2.0 [see LICENSE for details]
 # Written by Xueyan Zou (xueyan@cs.wisc.edu)
 # --------------------------------------------------------
@@ -26,7 +26,7 @@ from ..modules import PositionEmbeddingSine
 from ..modules.point_features import point_sample
 
 
-class GRINDecoder(nn.Module):
+class FINDDecoder(nn.Module):
 
     @configurable
     def __init__(
@@ -519,5 +519,5 @@ class GRINDecoder(nn.Module):
 
 
 @register_decoder
-def get_grin_decoder(cfg, in_channels, lang_encoder, mask_classification, extra):
-    return GRINDecoder(cfg, in_channels, lang_encoder, mask_classification, extra)
+def get_find_decoder(cfg, in_channels, lang_encoder, mask_classification, extra):
+    return FINDDecoder(cfg, in_channels, lang_encoder, mask_classification, extra)

@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 # Define Test/Trainer/Saving
-PIPELINE: GRINPipeline
+PIPELINE: FINDPipeline
 TRAINER: xdecoder
 SAVE_DIR: '../../data/output/test'
 base_path: "./"
@@ -37,7 +37,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: grin_model
+  NAME: find_model
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -45,24 +45,36 @@ MODEL:
   DIM_PROJ: 512
   BACKBONE_DIM: 768
   TEXT:
-    ARCH: vlpencoder
-    NAME: transformer
+    ARCH: llamaencoder
+    NAME: huggyllama/llama-7b
     TOKENIZER: clip
     CONTEXT_LENGTH: 77 # 77
-    WIDTH: 512
-    HEADS: 8
-    LAYERS: 12 # 6
-    FEATURE_LAYER: -1
-    AUTOGRESSIVE: True
+    STOP_TOKEN: "###"
+    WIDTH: 4096
+    FEATURE_LAYER: -12
     LOAD_TENSOR: False
     PRECOMPUTE: False
-    PRETRAINED: ''
   BACKBONE:
-    NAME: vit
-    PRETRAINED: '/mnt/output/xueyanz/pretrained/sam/sam_vit_b_01ec64.pth'
-    LOAD_PRETRAINED: true
-    VIT:
-      SIZE: "base"
+    NAME: focal
+    PRETRAINED: ''
+    LOAD_PRETRAINED: false
+    FOCAL:
+      PRETRAIN_IMG_SIZE: 224
+      PATCH_SIZE: 4
+      EMBED_DIM: 192
+      DEPTHS: [2, 2, 18, 2]
+      FOCAL_LEVELS: [4, 4, 4, 4]
+      FOCAL_WINDOWS: [3, 3, 3, 3]
+      DROP_PATH_RATE: 0.3
+      MLP_RATIO: 4.0
+      DROP_RATE: 0.0
+      PATCH_NORM: True
+      USE_CONV_EMBED: True
+      SCALING_MODULATOR: True
+      USE_CHECKPOINT: False
+      USE_POSTLN: true
+      USE_POSTLN_IN_MODULATION: false
+      USE_LAYERSCALE: True
       OUT_FEATURES: ["res2", "res3", "res4", "res5"]
       OUT_INDICES: [0, 1, 2, 3]
   ENCODER:
@@ -78,11 +90,11 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: grin
+    NAME: find
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True
-      CLASS_TOKEN_LENGTH: 77
+      CLASS_TOKEN_LENGTH: 150
     DETECTION: False
     SPATIAL:
       ENABLED: True
@@ -148,7 +160,7 @@ MODEL:
     # ENC_LAYERS: 0
     PRE_NORM: False
     ENFORCE_INPUT_PROJ: False
-    SIZE_DIVISIBILITY: 1024
+    SIZE_DIVISIBILITY: 32
     TRAIN_NUM_POINTS: 12544
     OVERSAMPLE_RATIO: 3.0
     IMPORTANCE_SAMPLE_RATIO: 0.75
@@ -332,12 +344,13 @@ ATTENTION_ARCH:
 DATASETS:
   # TRAIN: ["coco_2017_val_panoptic_with_sem_seg_caption_grounding_lvis_entity",]
   TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding_lvis_entity",]
-  TEST: ["coco_2017_val_panoptic_with_sem_seg", "refcocog_val_umd", "vlp_val", "pascalvoc_val_Point", "grounding_coco_entity_val", "vlp_coco_entity_val"]  # to evaluate instance and semantic performance as well
+  TEST: ["vlp_coco_entity_val"]
+  # TEST: ["coco_2017_val_panoptic_with_sem_seg", "refcocog_val_umd", "vlp_val", "pascalvoc_val_Point", "grounding_coco_entity_val", "vlp_coco_entity_val"]  # to evaluate instance and semantic performance as well
   # TEST: ["vlp_f30k_val_interleave2i"] # vlp_f30k_val_interleave2i, vlp_coco_val_interactive2i, vlp_coco_val_p2i, vlp_f30k_val_p2i, vlp_val
   # TEST: ["pascalvoc_val_Point"] # sbd_val_*, pascalvoc_val_*
   # TEST: ["grounding_coco_entity_val", "vlp_coco_entity_val", "vlp_coco_interleave_val"]
   CLASS_CONCAT: false
-  SIZE_DIVISIBILITY: 1024
+  SIZE_DIVISIBILITY: 32
   PROPOSAL_FILES_TRAIN: []
 
 INPUT:
@@ -359,15 +372,15 @@ COCO:
     MIN_SIZE_TRAIN: 800
     MAX_SIZE_TRAIN: 1333
     MIN_SIZE_TRAIN_SAMPLING: 'choice'
-    MIN_SIZE_TEST: 1000
-    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
     IMAGE_SIZE: 1024
     MIN_SCALE: 0.1
     MAX_SCALE: 2.0
     DATASET_MAPPER_NAME: "coco_interleave"
     IGNORE_VALUE: 255
     COLOR_AUG_SSD: False
-    SIZE_DIVISIBILITY: 1024
+    SIZE_DIVISIBILITY: 32
     RANDOM_FLIP: "horizontal"
     MASK_FORMAT: "polygon"
     FORMAT: "RGB"
@@ -435,8 +448,8 @@ SBD:
 
 VOC:
   INPUT:
-    MIN_SIZE_TEST: 1000
-    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
   DATALOADER:
     FILTER_EMPTY_ANNOTATIONS: False
     NUM_WORKERS: 0
@@ -450,7 +463,7 @@ REF:
   INPUT:
     PIXEL_MEAN: [123.675, 116.280, 103.530]
     PIXEL_STD: [58.395, 57.120, 57.375]
-    MIN_SIZE_TEST: 1000
+    MIN_SIZE_TEST: 512
     MAX_SIZE_TEST: 1024
     FORMAT: "RGB"
     SPATIAL: False
@@ -465,9 +478,9 @@ REF:
 
 VLP:
   INPUT:
-    IMAGE_SIZE: 1024
+    IMAGE_SIZE: 224
     SHORTEST_EDGE: False
-    MIN_SIZE_TEST: 1000
+    MIN_SIZE_TEST: 512
     MAX_SIZE_TEST: 1024
     DATASET_MAPPER_NAME: "vlpretrain"
     IGNORE_VALUE: 255
@@ -494,6 +507,19 @@ F30K:
     MIN_SIZE_TEST: 224
     MAX_SIZE_TEST: 512
     FORMAT: "RGB"
+  DATALOADER:
+    FILTER_EMPTY_ANNOTATIONS: False
+    NUM_WORKERS: 0
+    LOAD_PROPOSALS: False
+    SAMPLER_TRAIN: "TrainingSampler"
+    ASPECT_RATIO_GROUPING: False
+  TEST:
+    BATCH_SIZE_TOTAL: 8
+
+DAVIS:
+  INPUT:
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
   DATALOADER:
     FILTER_EMPTY_ANNOTATIONS: False
     NUM_WORKERS: 0

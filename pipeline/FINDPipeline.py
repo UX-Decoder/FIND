@@ -34,7 +34,7 @@ from .utils.misc import hook_metadata, hook_switcher, hook_opt
 logger = logging.getLogger(__name__)
 
 
-class GRINPipeline:
+class FINDPipeline:
     def __init__(self, opt):
         self._opt = opt
 

@@ -1,5 +1,5 @@
 # --------------------------------------------------------
-# GRIN -- Grounded Interleaved Visual Understanding
+# FIND -- Interfacing Foundation Model Embeddings
 # Written by Xueyan Zou (xueyan@cs.wisc.edu)
 # --------------------------------------------------------
 

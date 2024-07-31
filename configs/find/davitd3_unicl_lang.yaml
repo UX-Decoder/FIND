@@ -6,7 +6,7 @@
 # --------------------------------------------------------
 
 # Define Test/Trainer/Saving
-PIPELINE: GRINPipeline
+PIPELINE: FINDPipeline
 TRAINER: xdecoder
 SAVE_DIR: '../../data/output/test'
 base_path: "./"
@@ -37,7 +37,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: grin_model
+  NAME: find_model
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -88,7 +88,7 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: grin
+    NAME: find
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True

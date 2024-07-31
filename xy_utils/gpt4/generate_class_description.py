@@ -17,26 +17,26 @@ def run(class_name, openai_version):
 
     if openai_version == 0:
         openai.api_type = "azure"
-        openai.api_base = "https://vigoai.openai.azure.com/"
+        openai.api_base = ""
         openai.api_version = "2023-03-15-preview"
-        openai.api_key = os.getenv("OPENAI_API_KEY_LINJIE")
+        openai.api_key = os.getenv("OPENAI_API_KEY")
         deployment_id = "gpt4"
     elif openai_version == 1:
         openai.api_type = "azure"
-        openai.api_base = "https://xdecoder.openai.azure.com/"
+        openai.api_base = ""
         openai.api_version = "2023-03-15-preview"
         openai.api_key = os.getenv("OPENAI_API_KEY")
         deployment_id = "gpt4a"
     elif openai_version == 2:
         openai.api_key = os.getenv("OPENAI_API_KEY_AZURE")
-        openai.api_base ='https://azureopenaifiahmedeastus.openai.azure.com/' # your endpoint should look like the following https://YOUR_RESOURCE_NAME.openai.azure.com/
+        openai.api_base ='' # your endpoint should look like the following https://YOUR_RESOURCE_NAME.openai.azure.com/
         openai.api_type = 'azure'
         openai.api_version = '2023-03-15-preview' # this may change in the future
         deployment_id='gpt-4-32k-0314' #This will correspond to the custom name you chose for your deployment when you deployed a model.
     elif openai_version == 3:
-        openai.api_base ='https://azureopenaifiahmedeastus.openai.azure.com/' # your endpoint should look like the following https://YOUR_RESOURCE_NAME.openai.azure.com/
+        openai.api_base ='' # your endpoint should look like the following https://YOUR_RESOURCE_NAME.openai.azure.com/
         openai.api_type = 'azure'
-        openai.api_key = os.getenv("OPENAI_API_KEY_ZY")
+        openai.api_key = os.getenv("OPENAI_API_KEY")
         openai.api_version = '2023-07-01-preview' # this may change in the future
         deployment_id='gpt-4-32k-0613' #This will correspond to the custom name you chose for your deployment when you deployed a model.
     else:

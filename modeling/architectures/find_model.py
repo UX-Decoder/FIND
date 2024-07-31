@@ -1,5 +1,5 @@
 # --------------------------------------------------------
-# GRIN -- Grounded Interleaved Visual Understanding
+# FIND -- Interfacing Foundation Models' Embeddings
 # Licensed under The Apache License 2.0 [see LICENSE for details]
 # Written by Xueyan Zou (xueyan@cs.wisc.edu)
 # --------------------------------------------------------
@@ -34,7 +34,7 @@ from utils.distributed import get_rank
 st = LancasterStemmer()
 
 
-class GeneralizedGRIN(nn.Module):
+class GeneralizedFIND(nn.Module):
 
     @configurable
     def __init__(
@@ -2175,5 +2175,5 @@ class GeneralizedGRIN(nn.Module):
 
 
 @register_model
-def get_grin_model(cfg, **kwargs):
-    return GeneralizedGRIN(cfg)
+def get_find_model(cfg, **kwargs):
+    return GeneralizedFIND(cfg)
