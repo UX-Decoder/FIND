@@ -1,14 +1,16 @@
-# 🔍 FIND: Interface Foundation Models' Embeddings
+# 🔍 FIND: Interfacing Foundation Models' Embeddings
 :grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net:6789)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
 
-We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**ings in an interleaved shared embedding space. Below is a brief introduction of all the generic and interleave tasks we can do!
+We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**ings in an interleaved shared embedding space. Below is a brief introduction to the generic and interleave tasks we can do!
 
-<!-- by [Xueyan Zou*](https://maureenzou.github.io/), [Jianwei Yang*](https://jwyang.github.io/), [Hao Zhang*](https://scholar.google.com/citations?user=B8hPxMQAAAAJ&hl=en),  [Feng Li*](https://fengli-ust.github.io/), [Linjie Li](https://scholar.google.com/citations?user=WR875gYAAAAJ&hl=en), [Jianfeng Wang](http://jianfengwang.me/), [Lijuan Wang](https://scholar.google.com/citations?user=cDcWXuIAAAAJ&hl=zh-CN), [Jianfeng Gao^](https://www.microsoft.com/en-us/research/people/jfgao/?from=http%3A%2F%2Fresearch.microsoft.com%2Fen-us%2Fum%2Fpeople%2Fjfgao%2F), [Yong Jae Lee^](https://pages.cs.wisc.edu/~yongjaelee/), in **NeurIPS 2023**. -->
+by [Xueyan Zou](https://maureenzou.github.io/), [Linjie Li](https://scholar.google.com/citations?user=WR875gYAAAAJ&hl=en), [Jianfeng Wang](http://jianfengwang.me/), [Jianwei Yang](https://jwyang.github.io/), [Mingyu Ding](https://dingmyu.github.io/), [Junyi Wei](https://scholar.google.com/citations?user=Kb1GL40AAAAJ&hl=en), [Zhengyuan Yang](https://zyang-ur.github.io/), [Feng Li](https://fengli-ust.github.io/), [Hao Zhang](https://scholar.google.com/citations?user=B8hPxMQAAAAJ&hl=en), [Shilong Liu](https://lsl.zone/), [Arul Aravinthan](https://www.linkedin.com/in/arul-aravinthan-414509218/), [Yong Jae Lee*](https://pages.cs.wisc.edu/~yongjaelee/), [Lijuan Wang*](https://scholar.google.com/citations?user=cDcWXuIAAAAJ&hl=zh-CN), 
+
+\* Equal Advising
 
 ![FIND design](assets/images/teaser.jpg?raw=true)
 
 ## :rocket: Updates
-* **[2023.12.3]**  We have a poster session@NeurIPS24 for [SEEM](https://arxiv.org/pdf/2304.06718.pdf), feel free to visit us during 5:00-7:00pm (CT)!
+* **[2023.12.3]**  We have a poster session @ NeurIPS24 for [SEEM](https://arxiv.org/pdf/2304.06718.pdf), feel free to visit us during 5:00-7:00pm (CT)!
 * **[2023.12.2]**  We have released all the training, evaluation, and demo code!
 
 ## :bookmark_tabs: Catalog
@@ -20,14 +22,24 @@ We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**
 - [x] Evaluation Code
 
 ## :hammer: Getting Started
-<details>
-<summary><span style="font-weight: bold;">Installation</span></summary>
-  #### llll
-</details>
-<br>
-* Running demo from zero.
-```sh
+* **Build Environment**
+
 ```
+conda create --name find python=3.10
+conda activate find
+conda install -c conda-forge mpi4py
+conda install -c conda-forge cudatoolkit=11.7
+conda install -c nvidia/label/cuda-11.7.0 cuda-toolkit
+pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 torchaudio==2.0.2+cu117 -f https://download.pytorch.org/whl/torch_stable.html
+pip install -r assets/requirements/requirements.txt
+pip install -r assets/requirements/requirements_custom.txt
+cd modeling/vision/encoder/ops
+sh make.sh
+cd ../../..
+```
+
+* **Build Dataset**
+* **Run Demo**
 
 ## :coconut: Dataset
 | entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
