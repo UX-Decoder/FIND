@@ -93,12 +93,6 @@ Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/
 | Focal-T           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focalt_llama_x640.pt) | 74.9        | 79.5 | 43.5 | 57.1  | 73.2             | 77.7 | 49.4 | 63.9  |
 | Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focall_llama_x640.pt) |             |      |      |       |                  |      |      |       |
 
-## 🧑‍💻 Demo
-* **Example Output**
-
-<img width="400" alt="Screenshot 2023-12-13 at 10 28 05 AM" src="https://github.com/UX-Decoder/FIND/assets/11957155/48d84fb9-160c-4113-b50b-e7872dcde544">
-<img width="400" alt="Screenshot 2023-12-13 at 10 31 36 AM" src="https://github.com/UX-Decoder/FIND/assets/11957155/b63582b2-45ca-4b3d-afd1-419770af2e2a">
-
 ## :framed_picture: FIND-Bench Visualization
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 54 PM" src="https://github.com/user-attachments/assets/541d5761-88f9-4797-ba07-66effcdd3e45">
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 46 PM" src="https://github.com/user-attachments/assets/dfece581-578a-4b41-9c18-d957f5868dcb">
