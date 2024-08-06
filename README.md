@@ -97,7 +97,31 @@ Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 54 PM" src="https://github.com/user-attachments/assets/541d5761-88f9-4797-ba07-66effcdd3e45">
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 46 PM" src="https://github.com/user-attachments/assets/dfece581-578a-4b41-9c18-d957f5868dcb">
 
+## 🔗 Citation
+If you find this repo useful for your research and applications, please cite using this BibTeX:
+```
+@misc{zou2022xdecoder,
+      title={Generalized decoding for pixel, image, and language}, 
+      author={Zou, Xueyan and Dou, Zi-Yi and Yang, Jianwei and Gan, Zhe and Li, Linjie and Li, Chunyuan and Dai, Xiyang and Behl, Harkirat and Wang, Jianfeng and Yuan, Lu and others},
+      publisher={CVPR},
+      year={2023},
+}
+
+@misc{zou2023seem,
+      title={Segment everything everywhere all at once}, 
+      author={Zou, Xueyan and Yang, Jianwei and Zhang, Hao and Li, Feng and Li, Linjie and Wang, Jianfeng and Wang, Lijuan and Gao, Jianfeng and Lee, Yong Jae},
+      publisher={NeurIPS},
+      year={2024},
+}
+
+@misc{zou2024find,
+      title={Interfacing Foundation Models' Embeddings}, 
+      author={Zou, Xueyan and Li, Linjie and Wang, Jianfeng and Yang, Jianwei and Ding, Mingyu and Yang, Zhengyuan and Li, Feng and Zhang, Hao and Liu, Shilong and Aravinthan, Arul and others},
+      publisher={arXiv preprint arXiv:2312.07532},
+      year={2023},
+}
+```
 
 ## 📚 Acknowledgement
-This research project has benefitted from the Microsoft Accelerate Foundation Models Research (AFMR) grant program. And will receive GPU credit grant for the demo session from Hugging Face.
+This research project has benefitted from the Microsoft Accelerate Foundation Models Research (AFMR) grant program.
 
