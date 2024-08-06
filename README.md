@@ -98,5 +98,6 @@ Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 46 PM" src="https://github.com/user-attachments/assets/dfece581-578a-4b41-9c18-d957f5868dcb">
 
 
-## 📚 Reference
+## 📚 Acknowledgement
+This research project has benefitted from the Microsoft Accelerate Foundation Models Research (AFMR) grant program. And will receive GPU credit grant for the demo session from Hugging Face.
 
