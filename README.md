@@ -1,5 +1,5 @@
 # 🔍 FIND: Interfacing Foundation Models' Embeddings
-:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](http://find.xyzou.net:6789)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
+:grapes: \[[Read our arXiv Paper](https://arxiv.org/pdf/2312.07532.pdf)\] &nbsp; :apple: \[[Try our Demo](https://e6efa3093a88ff2321.gradio.live)\] &nbsp; :orange: \[[Walk through Project Page](https://x-decoder-vl.github.io/)\]
 
 We introduce **FIND** that can **IN**terfacing **F**oundation models' embe**DD**ings in an interleaved shared embedding space. Below is a brief introduction to the generic and interleave tasks we can do!
 
@@ -70,6 +70,21 @@ data/
 </details>
 
 **Run Demo**
+```
+python3 -m demo.find.demo_interleave_llama evaluate \
+            --conf_files configs/find/focall_llama_lang.yaml \
+            --overrides \
+            MODEL.DECODER.HIDDEN_DIM 512 \
+            MODEL.ENCODER.CONVS_DIM 512 \
+            MODEL.ENCODER.MASK_DIM 512 \
+            VLP.INPUT.SHORTEST_EDGE True \
+            VLP.INPUT.MIN_SIZE_TEST 480 \
+            VLP.INPUT.MAX_SIZE_TEST 640 \
+            VLP.TEST.BATCH_SIZE_TOTAL 8 \
+            RESUME_FROM /data/xueyanz/checkpoints/find/grin_focall_llama_x640.pt \
+            FP16 True \
+            FAKE_UPDATE True
+```
 
 **Run Evaluation**
 
