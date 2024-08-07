@@ -81,7 +81,7 @@ python3 -m demo.find.demo_interleave_llama evaluate \
             VLP.INPUT.MIN_SIZE_TEST 480 \
             VLP.INPUT.MAX_SIZE_TEST 640 \
             VLP.TEST.BATCH_SIZE_TOTAL 8 \
-            RESUME_FROM /data/xueyanz/checkpoints/find/grin_focall_llama_x640.pt \
+            RESUME_FROM /pth/to/grin_focall_llama_x640.pt \
             FP16 True \
             FAKE_UPDATE True
 ```
