@@ -69,6 +69,8 @@ data/
 </pre>
 </details>
 
+Please download the COCO dataset, and follow the instructions in [Mask2Former](https://github.com/facebookresearch/Mask2Former). And please also download the FIND-Bench data in the dataset section.
+
 **Run Demo**
 ```
 python3 -m demo.find.demo_interleave_llama evaluate \
