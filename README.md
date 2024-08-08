@@ -69,7 +69,7 @@ data/
 </pre>
 </details>
 
-Please download the COCO dataset, and follow the instructions in [Mask2Former](https://github.com/facebookresearch/Mask2Former). And please also download the FIND-Bench data in the dataset section.
+Please download the COCO dataset, and follow the instructions in [Mask2Former](https://github.com/facebookresearch/Mask2Former). And please also download the FIND-Bench data in the dataset section, and placed under annotation section.
 
 **Run Demo**
 ```
