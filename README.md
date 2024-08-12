@@ -77,11 +77,11 @@ data/
 </pre>
 </details>
 
-To run the **demo**, files/folders within * * are required, please download [COCO dataset](https://cocodataset.org/#download) and FIND-Bench annotations [entity_val2017.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json) and [entity_val2017_long.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json).
+* To run the **demo**, files/folders within * * are required, please download [COCO dataset](https://cocodataset.org/#download) and FIND-Bench annotations [entity_val2017.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json) and [entity_val2017_long.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json).
 
-To run the evaluation, please additionally download: xxx.
+* To run the evaluation, please additionally download: xxx.
 
-To run training, please additionally download: xxx.
+* To run training, please additionally download: xxx.
 
 **Run Demo**
 ```
