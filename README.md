@@ -51,6 +51,14 @@ cd ../../..
 ```
 
 **Build Dataset**
+
+Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/xueyanz/FIND-Bench).
+
+**Download Raw File:**
+| entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
+|-----------------------|---------------------|--------------------------|
+| [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json)                 |
+
 <details open>
 <summary>Data Structure</summary>
 <pre>
@@ -58,18 +66,22 @@ data/
 └── coco/
     ├── annotations/
     │   ├── entity_train2017.json
-    │   ├── entity_val2017.json
-    │   └── entity_val2017_long.json
+    │   ├── *entity_val2017.json*
+    │   └── *entity_val2017_long.json*
     ├── panoptic_semseg_train2017/
     ├── panoptic_semseg_val2017/
     ├── panoptic_train2017/
     ├── panoptic_val2017/
     ├── train2017/
-    └── val2017/
+    └── *val2017/*
 </pre>
 </details>
 
-Please download the COCO dataset, and follow the instructions in [Mask2Former](https://github.com/facebookresearch/Mask2Former). And please also download the FIND-Bench data in the dataset section, and placed under annotation section.
+To run the **demo**, files/folders within * * are required, please download [COCO dataset](https://cocodataset.org/#download) and FIND-Bench annotations [entity_val2017.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json) and [entity_val2017_long.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json).
+
+To run the evaluation, please additionally download: xxx.
+
+To run training, please additionally download: xxx.
 
 **Run Demo**
 ```
@@ -91,14 +103,6 @@ python3 -m demo.find.demo_interleave_llama evaluate \
 **Run Evaluation**
 
 **Run Training**
-
-## 🗂️ Dataset
-Explore through [🤗 Hugging Face: FIND-Bench](https://huggingface.co/datasets/xueyanz/FIND-Bench).
-
-**Download Raw File:**
-| entity_train2017.json | entity_val2017.json | entity_val2017_long.json |
-|-----------------------|---------------------|--------------------------|
-| [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_train2017.json)              | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json)            | [download](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json)                 |
 
 
 ## ⛳ Checkpoint
