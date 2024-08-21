@@ -79,9 +79,9 @@ data/
 
 * To run the **demo**, files/folders within * * are required, please download [COCO dataset](https://cocodataset.org/#download) and FIND-Bench annotations [entity_val2017.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017.json) and [entity_val2017_long.json](https://huggingface.co/datasets/xueyanz/FIND-Bench/resolve/main/entity_val2017_long.json).
 
-* To run the evaluation, please additionally download: xxx.
+* To run evaluation, please additionally prepare panoptic_val2017 according to [Mask2Former](https://github.com/facebookresearch/Mask2Former).
 
-* To run training, please additionally download: xxx.
+* To run training, please additionally download and prepare all other files.
 
 **Run Demo**
 <summary>Command</summary>
