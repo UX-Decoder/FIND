@@ -168,7 +168,7 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 mpirun -n 4 python entry.py evaluate \
 **Run Training**
 
 
-## ⛳ Checkpoint
+## ⛳ Interleave Checkpoint
 |                   |          | COCO-Entity |      |      |       | COCO-Entity-Long |      |      |       |
 |-------------------|----------|-------------|------|------|-------|------------------|------|------|-------|
 |                   |          | cIoU        | AP50 | IR@5 | IR@10 | cIoU             | AP50 | IR@5 | IR@10 |
