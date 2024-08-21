@@ -84,7 +84,8 @@ data/
 * To run training, please additionally download: xxx.
 
 **Run Demo**
-```
+<summary>Command</summary>
+<pre>
 python3 -m demo.find.demo_interleave_llama evaluate \
             --conf_files configs/find/focall_llama_lang.yaml \
             --overrides \
@@ -98,10 +99,42 @@ python3 -m demo.find.demo_interleave_llama evaluate \
             RESUME_FROM /pth/to/grin_focall_llama_x640.pt \
             FP16 True \
             FAKE_UPDATE True
-```
+</pre>
+</details>
+
 
 **Run Evaluation**
 <details open>
+
+<summary>Single-GPU</summary>
+<pre>
+python entry.py evaluate \
+            --conf_files configs/find/focall_llama_lang.yaml \
+            --overrides \
+            FP16 True \
+            MODEL.DECODER.MASK.ENABLED True \
+            MODEL.DECODER.CAPTION.ENABLED True \
+            MODEL.DECODER.SPATIAL.ENABLED True \
+            MODEL.DECODER.RETRIEVAL.ENABLED True \
+            MODEL.DECODER.GROUNDING.ENABLED True \
+            MODEL.DECODER.INTERLEAVE.ENABLED True \
+            MODEL.DECODER.INTERLEAVE.VISUAL_PROB 0.5 \
+            COCO.TRAIN.BATCH_SIZE_TOTAL 1 \
+            COCO.TRAIN.BATCH_SIZE_PER_GPU 1 \
+            COCO.TEST.BATCH_SIZE_TOTAL 1 \
+            FP16 True \
+            REF.TEST.BATCH_SIZE_TOTAL 1 \
+            VLP.TEST.BATCH_SIZE_TOTAL 1 \
+            VLP.INPUT.SHORTEST_EDGE True \
+            VLP.INPUT.MIN_SIZE_TEST 512 \
+            VLP.INPUT.MAX_SIZE_TEST 720 \
+            COCO.INPUT.MIN_SIZE_TEST 640 \
+            COCO.INPUT.MAX_SIZE_TEST 1024 \
+            WEIGHT True \
+            RESUME_FROM /pth/to/grin_focall_llama_x640.pt
+</pre>
+</details>
+
 <summary>Multi-GPU</summary>
 <pre>
 CUDA_VISIBLE_DEVICES=4,5,6,7 mpirun -n 4 python entry.py evaluate \
