@@ -186,23 +186,23 @@ If you find this repo useful for your research and applications, please cite usi
 ```
 @misc{zou2022xdecoder,
       title={Generalized decoding for pixel, image, and language}, 
-      author={Zou, Xueyan and Dou, Zi-Yi and Yang, Jianwei and Gan, Zhe and Li, Linjie and Li, Chunyuan and Dai, Xiyang and Behl, Harkirat and Wang, Jianfeng and Yuan, Lu and others},
+      author={Zou*, Xueyan and Dou*, Zi-Yi and Yang*, Jianwei and Gan, Zhe and Li, Linjie and Li, Chunyuan and Dai, Xiyang and Behl, Harkirat and Wang, Jianfeng and Yuan, Lu and Peng, Nanyun and Wang, Lijuan and Lee†, Yong Jae and Gao†, Jianfeng},
       publisher={CVPR},
       year={2023},
 }
 
 @misc{zou2023seem,
       title={Segment everything everywhere all at once}, 
-      author={Zou, Xueyan and Yang, Jianwei and Zhang, Hao and Li, Feng and Li, Linjie and Wang, Jianfeng and Wang, Lijuan and Gao, Jianfeng and Lee, Yong Jae},
+      author={Zou*, Xueyan and Yang*, Jianwei and Zhang*, Hao and Li*, Feng and Li, Linjie and Wang, Jianfeng and Wang, Lijuan and Gao†, Jianfeng and Lee†, Yong Jae},
       publisher={NeurIPS},
-      year={2024},
+      year={2023},
 }
 
 @misc{zou2024find,
       title={Interfacing Foundation Models' Embeddings}, 
-      author={Zou, Xueyan and Li, Linjie and Wang, Jianfeng and Yang, Jianwei and Ding, Mingyu and Yang, Zhengyuan and Li, Feng and Zhang, Hao and Liu, Shilong and Aravinthan, Arul and others},
+      author={Zou, Xueyan and Li, Linjie and Wang, Jianfeng and Yang, Jianwei and Ding, Mingyu and Yang, Zhengyuan and Li, Feng and Zhang, Hao and Liu, Shilong and Aravinthan, Arul and Lee†, Yong Jae and Wang†, Lijuan},
       publisher={arXiv preprint arXiv:2312.07532},
-      year={2023},
+      year={2024},
 }
 ```
 
