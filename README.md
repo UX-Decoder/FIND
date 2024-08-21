@@ -135,7 +135,7 @@ python entry.py evaluate \
 </pre>
 </details>
 
-<details open>
+<details close>
 <summary>Multi-GPU</summary>
 <pre>
 CUDA_VISIBLE_DEVICES=4,5,6,7 mpirun -n 4 python entry.py evaluate \
