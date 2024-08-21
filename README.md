@@ -101,6 +101,35 @@ python3 -m demo.find.demo_interleave_llama evaluate \
 ```
 
 **Run Evaluation**
+<details open>
+<summary>Multi-GPU</summary>
+<pre>
+CUDA_VISIBLE_DEVICES=4,5,6,7 mpirun -n 4 python entry.py evaluate \
+            --conf_files configs/find/focall_llama_lang.yaml \
+            --overrides \
+            FP16 True \
+            MODEL.DECODER.MASK.ENABLED True \
+            MODEL.DECODER.CAPTION.ENABLED True \
+            MODEL.DECODER.SPATIAL.ENABLED True \
+            MODEL.DECODER.RETRIEVAL.ENABLED True \
+            MODEL.DECODER.GROUNDING.ENABLED True \
+            MODEL.DECODER.INTERLEAVE.ENABLED True \
+            MODEL.DECODER.INTERLEAVE.VISUAL_PROB 0.5 \
+            COCO.TRAIN.BATCH_SIZE_TOTAL 1 \
+            COCO.TRAIN.BATCH_SIZE_PER_GPU 1 \
+            COCO.TEST.BATCH_SIZE_TOTAL 4 \
+            FP16 True \
+            REF.TEST.BATCH_SIZE_TOTAL 4 \
+            VLP.TEST.BATCH_SIZE_TOTAL 4 \
+            VLP.INPUT.SHORTEST_EDGE True \
+            VLP.INPUT.MIN_SIZE_TEST 512 \
+            VLP.INPUT.MAX_SIZE_TEST 720 \
+            COCO.INPUT.MIN_SIZE_TEST 640 \
+            COCO.INPUT.MAX_SIZE_TEST 1024 \
+            WEIGHT True \
+            RESUME_FROM /pth/to/grin_focall_llama_x640.pt
+</pre>
+</details>
 
 **Run Training**
 
@@ -112,7 +141,7 @@ python3 -m demo.find.demo_interleave_llama evaluate \
 | ImageBIND (H)     | -        | -           | -    | 51.4 | 61.3  | -                | -    | 58.7 | 68.9  |
 | Grounding-SAM (H) | -        | 58.9        | 63.2 | -    | -     | 56.1             | 62.5 | -    | -     |
 | Focal-T           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focalt_llama_x640.pt) | 74.9        | 79.5 | 43.5 | 57.1  | 73.2             | 77.7 | 49.4 | 63.9  |
-| Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focall_llama_x640.pt) |             |      |      |       |                  |      |      |       |
+| Focal-L           | [ckpt](https://huggingface.co/xueyanz/FIND/resolve/main/find_focall_llama_x640.pt) |      76.2       |  81.3    |   81.1   |   88.7    |       74.8           |  79.3    |   89.3   |   94.6    |
 
 ## :framed_picture: FIND-Bench Visualization
 <img width="400" alt="Screenshot 2024-08-05 at 3 50 54 PM" src="https://github.com/user-attachments/assets/541d5761-88f9-4797-ba07-66effcdd3e45">

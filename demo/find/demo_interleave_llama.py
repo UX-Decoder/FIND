@@ -133,8 +133,8 @@ def main(args=None):
                 object_class_emb_list += [outputs['pred_captions']]
                 object_pixel_emb_list += [outputs['pred_maskembs']]
 
-                if idx == 40 and debug:
-                    break
+                # if idx == 40 and debug:
+                #     break
 
             image_embs_class = torch.cat(image_class_emb_list, dim=0)
             image_embs_class = image_embs_class / image_embs_class.norm(dim=-1, keepdim=True)

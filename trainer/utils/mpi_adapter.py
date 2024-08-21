@@ -20,8 +20,9 @@ class MPIAdapter:
     def __init__(self, port='55551', set_env_vars=True):
         local_address = '127.0.0.1'
         default_torch_distributed_port = port  # chosen arbitrarily
-
-        if 'OMPI_COMM_WORLD_SIZE' not in os.environ:
+        comm = MPI.COMM_WORLD
+        
+        if 'OMPI_COMM_WORLD_SIZE' not in os.environ and comm.Get_size() == 1:
             # application was started without MPI
             # default to single node with single process
             self.env_info = 'no MPI'
@@ -34,10 +35,17 @@ class MPIAdapter:
         else:
             # application was started with MPI
             # get MPI parameters
-            self.world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
-            self.local_size = int(os.environ['OMPI_COMM_WORLD_LOCAL_SIZE'])
-            self.rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
-            self.local_rank = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
+            if 'OMPI_COMM_WORLD_SIZE' in os.environ:
+                self.world_size = int(os.environ['OMPI_COMM_WORLD_SIZE'])
+                self.local_size = int(os.environ['OMPI_COMM_WORLD_LOCAL_SIZE'])
+                self.rank = int(os.environ['OMPI_COMM_WORLD_RANK'])
+                self.local_rank = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
+            else:
+                self.world_size = comm.Get_size()
+                self.rank = comm.Get_rank()
+                # In this case, we assume running on the same node.
+                self.local_size = self.world_size
+                self.local_rank = self.rank
 
             if 'PHILLY_CONTAINER_IP' in os.environ:
                 # application is running on Philly

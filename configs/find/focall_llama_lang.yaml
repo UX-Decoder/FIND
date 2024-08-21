@@ -342,9 +342,9 @@ ATTENTION_ARCH:
   SPATIAL_MEMORIES: 32
 
 DATASETS:
-  # TRAIN: ["coco_2017_val_panoptic_with_sem_seg_caption_grounding_lvis_entity",]
   TRAIN: ["coco_2017_train_panoptic_filtall_with_sem_seg_caption_grounding_lvis_entity",]
-  TEST: ["vlp_coco_entity_val"]
+  # TEST: ["vlp_coco_entity_val", "grounding_coco_entity_val"]
+  TEST: ["vlp_coco_entity_val_long", "grounding_coco_entity_val_long"]
   # TEST: ["coco_2017_val_panoptic_with_sem_seg", "refcocog_val_umd", "vlp_val", "pascalvoc_val_Point", "grounding_coco_entity_val", "vlp_coco_entity_val"]  # to evaluate instance and semantic performance as well
   # TEST: ["vlp_f30k_val_interleave2i"] # vlp_f30k_val_interleave2i, vlp_coco_val_interactive2i, vlp_coco_val_p2i, vlp_f30k_val_p2i, vlp_val
   # TEST: ["pascalvoc_val_Point"] # sbd_val_*, pascalvoc_val_*
