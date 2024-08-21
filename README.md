@@ -10,6 +10,7 @@ by [Xueyan Zou](https://maureenzou.github.io/), [Linjie Li](https://scholar.goog
 ![FIND design](assets/images/teaser.jpg?raw=true)
 
 ## :rocket: Updates
+* **[2024.8.20]**  We have released an updated version arXiv with comprehensive user guide on GitHub!
 * **[2023.12.3]**  We have a poster session @ NeurIPS24 for [SEEM](https://arxiv.org/pdf/2304.06718.pdf), feel free to visit us during 5:00-7:00pm (CT)!
 * **[2023.12.2]**  We have released all the training, evaluation, and demo code!
 
