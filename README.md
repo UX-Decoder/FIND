@@ -84,6 +84,7 @@ data/
 * To run training, please additionally download and prepare all other files.
 
 **Run Demo**
+<details open>
 <summary>Command</summary>
 <pre>
 python3 -m demo.find.demo_interleave_llama evaluate \
@@ -105,7 +106,6 @@ python3 -m demo.find.demo_interleave_llama evaluate \
 
 **Run Evaluation**
 <details open>
-
 <summary>Single-GPU</summary>
 <pre>
 python entry.py evaluate \
@@ -135,6 +135,7 @@ python entry.py evaluate \
 </pre>
 </details>
 
+<details open>
 <summary>Multi-GPU</summary>
 <pre>
 CUDA_VISIBLE_DEVICES=4,5,6,7 mpirun -n 4 python entry.py evaluate \
